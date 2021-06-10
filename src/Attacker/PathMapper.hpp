@@ -51,6 +51,7 @@ public:
         return max;
     }
     PathMapper()=default;
+    u_int32_t get_time_step(){return time_t;}
     void random_choose_path(double seed)
     {
         //assert(step_counter==0);

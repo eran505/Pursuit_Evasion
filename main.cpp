@@ -7,7 +7,14 @@
 #include "States/Data/StateData.hpp"
 #include "Game/Initializer.hpp"
 #include "Attacker/StaticPolicy.hpp"
-int main() {
+//#include "Tests/test_exp.hpp"
+//#include "gtest/gtest.h"
+#include "Game/Sim.hpp"
+int main(int argc, char **argv) {
+
+//    ::testing::InitGoogleTest(&argc, argv);
+//    return RUN_ALL_TESTS();
+
     auto zero = Point(0);
     std::cout << "Hello, World!" << std::endl;
     std::string csv_path= getProjectDir() + "/csv/con16.csv";
@@ -24,14 +31,15 @@ int main() {
     auto grid = Initializer::init_grid(conf.sizeGrid,conf.gGoals,conf.probGoals);
     State s;
     s.g_grid=grid.get();
-    auto adata = Single(3);
+    auto adata = Single(1);
     s.add_player_state(agentEnum::A,conf.posAttacker.front(),zero,adata);
-    s.add_player_state(agentEnum::D,conf.posDefender.front(),Point(0),Single(10));
+    s.add_player_state(agentEnum::D,conf.posDefender.front(),Point(0),adata);
     cout<<s.to_string_state()<<endl;
     doPrint(cout,"hash:=",s.getHashValue());
-
-    auto attacker = Initializer::init_attacker(conf);
-
+    std::unique_ptr<StaticPolicy> evder_agent = Initializer::init_attacker(conf);
+    std::unique_ptr<PRecAgent> pursurer_agent = Initializer::init_defender(conf);
+    auto sim  = Emulator(pursurer_agent.get(),evder_agent.get(), std::move(s));
+    sim.main_loop();
 
     return 0;
 }

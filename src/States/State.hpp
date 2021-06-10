@@ -20,7 +20,8 @@ public:
 
     std::array<Point,4> dataPoint; // [A_POS,A_SPEED,D_POS,D_SPEED]
     //std::array<int,2> budgets{};
-    std::array<S,2> budgets{};
+    u_int32_t time_t=0;
+    S budgets;
     Grid *g_grid = nullptr;
     bool takeOff = false;
 
@@ -40,11 +41,11 @@ public:
     template<typename P>
     void set_position(agentEnum agent_id,P&& p){dataPoint[agent_id*2]=std::forward<P>(p);}
 
-    [[nodiscard]] S get_budget(agentEnum agent_id)const{return budgets[agent_id];}
+    [[nodiscard]] S get_budget()const{return budgets;}
 
-    [[maybe_unused]] [[nodiscard]] S& get_budget_ref(agentEnum agent_id)const{return budgets[agent_id];}
+    [[maybe_unused]] [[nodiscard]] S& get_budget_ref()const{return budgets;}
 
-    void set_budget(agentEnum agent_id,S b){budgets[agent_id]=b;}
+    void set_budget(S b){budgets=b;}
 
 
 
@@ -101,21 +102,21 @@ public:
     [[nodiscard]] string to_string_state() const {
         string sep="_";
         string str;
+        str.append(this->time_t+"_");
         for(int j =0;j<this->budgets.size();++j){
             string id_name = j==0?"A":"D";
             auto my_pos = this->dataPoint[j*2];
             auto my_speed =  this->dataPoint[j*2+1];
-            S my_budget = this->budgets[j];
+
             str.append(id_name);
             str.append(sep);
             str.append(my_pos.to_str());
             str.append(sep);
             str.append(my_speed.to_str());
-            str.append(sep);
-            str.append(my_budget.to_string());
             str+="|";
-            //str+=id_name+sep+my_pos->to_str()+sep+my_speed->to_str()+sep+to_string(my_budget);
         }
+        str.append(sep);
+        str.append(this->budgets.to_string());
         return str;
 
     }

@@ -26,7 +26,6 @@ class StaticPolicy{
     unordered_map<int,Point*>* hashActionMap{};
     agentEnum my_id;
     Randomizer randomizer;
-
 public:
     StaticPolicy(const Point &gridSize,uint maxSpeed,agentEnum id,u_int16_t num_of_paths,std::string home_path,const seq_goals& goals_points,const seq_starting& starting_points,int seed=4)
     :gen(seed,gridSize,maxSpeed),randomizer(seed)
@@ -45,6 +44,7 @@ public:
     void reset_policy(int seed)
     {
         mapper->random_choose_path(seed);
+        time_step=0;
     }
     void policy_data()const {
 
@@ -111,7 +111,15 @@ public:
             cout<<"["<<i<<"] = "<<counter[i]/float(max_iter)<<endl;
         }
     }
+    void get_action(State<> &s,int jumps=1)
+    {
+        auto state_point = this->mapper->get_next_actual_state(jumps);
+        s.set_position(this->get_id_name(),std::move(state_point.pos));
 
+        //s.set_budget(this->get_id_name(),mapper->get_time_step());
+        //s.set_speed(this->get_id_name(),);
+
+    }
 private:
     void make_mapper(std::vector<APath> all_pathz, std::vector<double> porbablites_arr)
     {

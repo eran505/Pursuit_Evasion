@@ -4,7 +4,7 @@
 
 #ifndef PE_INITIALIZER_HPP
 #define PE_INITIALIZER_HPP
-
+#include "GoalRec/AgentGR.hpp"
 #include "fileIO/processerCSV.hpp"
 #include "Grid.hpp"
 #include "States/State.hpp"
@@ -21,6 +21,12 @@ public:
         return std::move(std::make_unique<Grid>(grid_szie,Point(0),gGoals,probGoals));
     }
 
+    static std::unique_ptr<PRecAgent> init_defender(const configGame& conf)
+    {
+        //PRecAgent vv = PRecAgent(conf.maxD,agentEnum::D,conf.home,conf._seed);
+        return std::make_unique<PRecAgent>(conf.maxD,agentEnum::D,conf.home,conf._seed);
+
+    }
 
     static std::unique_ptr<StaticPolicy> init_attacker(const configGame& conf)
     {

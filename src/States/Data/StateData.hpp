@@ -21,16 +21,22 @@ public:
 
 struct Complex{
 public:
-    vector<u_int32_t> x;
+    vector<int> vec_data;
     Complex()=default;
-    explicit Complex(vector<u_int32_t> &&vec):x(vec){}
+    explicit Complex(vector<int> &&vec):vec_data(vec){}
     [[nodiscard]] u_int64_t hash_it() const{
-        return this->x.front();
+        u_int32_t res = std::accumulate(vec_data.begin(),vec_data.end(),0);
+        return res;
     }
 
     [[nodiscard]] string to_string() const{
-        return std::to_string(x.front());
+        string str;
+        std::for_each(vec_data.begin(),vec_data.end(),[&str](u_int32_t x){
+            str+="_"+std::to_string(x);
+        });
+        return str;
     }
+
 
 
 };
