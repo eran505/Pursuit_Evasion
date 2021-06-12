@@ -9,7 +9,7 @@
 // Created by ise on 14.11.2019.
 //
 
-
+//#define PRINT
 #define APPEDN 13        //int append=int(pow(int(actionMax),this->capacity))/2;
 //#define PRINT
 //#include <execution>
@@ -347,15 +347,10 @@ public:
 
     static vector<Point> getAllAction(vector<Point> &action_list){
         action_list.clear();
-        if (Point::D==2){
-            for (int i = -1; i < 2; ++i)
-                for (int j = -1; j < 2; ++j)
-                    action_list.emplace_back(i,j);
-        }else if(Point::D==3){
-            for (int i = -1; i < 2; ++i)
-                for (int j = -1; j < 2; ++j)
-                    for (int k = -1; k < 2; ++k)
-                        action_list.emplace_back(i,j,k);}
+        for (int i = -1; i < 2; ++i)
+            for (int j = -1; j < 2; ++j)
+                for (int k = -1; k < 2; ++k)
+                    action_list.emplace_back(i, j, k);
         return action_list;
     }
 
@@ -490,29 +485,15 @@ public:
         return res;
     }
 
+        static vector<Point> getVectorActionUniqie();
 
-    static std::unique_ptr<unordered_map<unsigned int, Point>> getDictActionUniqie();
+        static std::unique_ptr<unordered_map<unsigned int, Point>> getDictActionUniqie();
 };
 
 int getMaxDistance(const Point &a , const  Point &b );
 int getMaxDistancePos(const Point &a , const  Point &b );
 int range_random(int min, int max); //range : [min, max)
 vector<double> getTopK(int k,vector<double> &vec);
-//template<typename T>
-//std::ostream& print(std::ostream &out, T const &val) {
-//    return (out << val << " ");
-//}
-//
-//template<typename T1, typename T2>
-//std::ostream& print(std::ostream &out, std::pair<T1, T2> const &val) {
-//    return (out << "{" << val.first << " " << val.second << "} ");
-//}
-//
-//template<template<typename, typename...> class TT, typename... Args>
-//std::ostream& operator<<(std::ostream &out, TT<Args...> const &cont) {
-//    for(auto&& elem : cont) print(out, elem);
-//    return out;
-//}
 
 
 inline double fastPow(double a, double b) {

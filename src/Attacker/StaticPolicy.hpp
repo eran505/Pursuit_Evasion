@@ -37,14 +37,15 @@ public:
         make_mapper(list_pathz,probablity_list);
 
     }
-    agentEnum get_id_name() {return my_id;}
+    agentEnum get_id(){return my_id;}
     u_int32_t get_max_len_path(){return mapper->get_max_path_size();}
 
     ~StaticPolicy()  = default;
-    void reset_policy(int seed)
+    void reset_policy()
     {
-        mapper->random_choose_path(seed);
-        time_step=0;
+
+        mapper->random_choose_path(randomizer.get_double());
+        //time_step=0;
     }
     void policy_data()const {
 
@@ -67,15 +68,11 @@ public:
         catch (const std::exception &ex){std::cout << "Exception was thrown: " << ex.what() << std::endl;}
 
     }
-    Point get_action(State<> *s)
+    void make_action(State<> &s)
     {
-        assert(false);
-
-    }
-    void make_action(State<> *s,int jumps){
-        auto StatePoint = this->mapper->get_next_actual_state(jumps);
-        s->set_speed(this->get_id_name(),std::move(StatePoint.speed));
-        s->set_position(this->get_id_name(),std::move(StatePoint.pos));
+        auto StatePoint = this->mapper->get_next_actual_state(1);
+        s.set_speed(this->get_id(),std::move(StatePoint.speed));
+        s.set_position(this->get_id(),std::move(StatePoint.pos));
 
     }
     const vector<double>* TransitionAction(const State<> *s)const {
@@ -114,7 +111,7 @@ public:
     void get_action(State<> &s,int jumps=1)
     {
         auto state_point = this->mapper->get_next_actual_state(jumps);
-        s.set_position(this->get_id_name(),std::move(state_point.pos));
+        s.set_position(this->get_id(),std::move(state_point.pos));
 
         //s.set_budget(this->get_id_name(),mapper->get_time_step());
         //s.set_speed(this->get_id_name(),);

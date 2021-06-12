@@ -9,7 +9,7 @@
 #include "Grid.hpp"
 #include "States/State.hpp"
 #include "Attacker/StaticPolicy.hpp"
-
+#include "Agnets/DP/RTDP.h"
 class Initializer{
 
 public:
@@ -21,13 +21,19 @@ public:
         return std::move(std::make_unique<Grid>(grid_szie,Point(0),gGoals,probGoals));
     }
 
-    static std::unique_ptr<PRecAgent> init_defender(const configGame& conf)
+    static std::unique_ptr<PRecAgent> init_GR(const configGame& conf,const StaticPolicy* e)
     {
-        //PRecAgent vv = PRecAgent(conf.maxD,agentEnum::D,conf.home,conf._seed);
-        return std::make_unique<PRecAgent>(conf.maxD,agentEnum::D,conf.home,conf._seed);
+        auto agent_p = std::make_unique<PRecAgent>(conf.maxD,agentEnum::D,conf.home,conf._seed);
+        agent_p->intial_args(e->list_only_pos(),e->get_copy_probabilities());
+        return std::move(agent_p);
 
     }
+    static std::unique_ptr<RTDP> init_RTDP(const configGame& conf,const StaticPolicy* e)
+    {
+        auto agent_p = std::make_unique<RTDP>(e);
+        return std::move(agent_p);
 
+    }
     static std::unique_ptr<StaticPolicy> init_attacker(const configGame& conf)
     {
 

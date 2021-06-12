@@ -79,15 +79,8 @@ bool State<S>::isEndState(agentEnum idStr) const{
     const auto& pos = dataPoint[idStr*2];
     return this->g_grid->is_at_goal(pos);
 }
-template<typename S>
-bool State<S>::applyAction( agentEnum id, const Point &action, int max_speed) {
 
-    this->dataPoint[id*2+1]+=action;
-    this->dataPoint[id*2+1].change_speed_max(max_speed);
-    this->dataPoint[id*2]+=this->dataPoint[id*2+1];
-    auto outBound = this->g_grid->is_wall(this->dataPoint[id*2]);
-    return outBound;
-}
+
 template<typename S>
 bool State<S>::applyAction( agentEnum id,Point &action, int max_speed,int jumps) {
 

@@ -23,9 +23,10 @@ class PRecAgent {
     GoalRecognition GR;
 
 public:
+    agentEnum get_id(){return my_id;}
     PRecAgent(int maxSpeedAgent, agentEnum agentId, string home1, int seed);
 
-    Point get_action(State<> *s) ;
+    Point get_action(State<> &s) ;
     ~PRecAgent() =default;
 
     void reset_policy() ;
@@ -47,11 +48,11 @@ PRecAgent::PRecAgent(int maxSpeedAgent, agentEnum agentId, string home, int seed
 
 }
 
-Point PRecAgent::get_action(State<> *s){
+Point PRecAgent::get_action(State<> &s){
 
-    GR.set_my_location(s->get_position(this->my_id));
-    auto action  = GR.do_action(s->get_position(this->attackerID),
-                                s->get_speed_ref(this->my_id));
+    GR.set_my_location(s.get_position(this->my_id));
+    auto action  = GR.do_action(s.get_position(this->attackerID),
+                                s.get_speed_ref(this->my_id));
     return action;
 }
 

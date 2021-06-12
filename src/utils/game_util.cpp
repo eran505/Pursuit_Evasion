@@ -51,6 +51,25 @@ std::unique_ptr<unordered_map<unsigned int,Point>> Point::getDictActionUniqie() 
 }
 
 
+
+
+
+vector<Point> Point::getVectorActionUniqie() {
+    auto vec = vector<Point>(27);
+    for (int i = -1; i < 2; ++i)
+        for (int j = -1; j < 2; ++j)
+            for (int k = -1; k < 2; ++k) {
+                auto pAction = Point(i, j, k);
+                auto idx = pAction.hashMeAction(Point::actionMax);
+                vec.operator[](idx)=pAction;
+            }
+    return vec;
+}
+
+
+
+
+
 // this function return pointer to dict hash->action
 unordered_map<int,Point*>* Point::getDictAction() {
     auto *mapAction = new unordered_map<int, Point *>();

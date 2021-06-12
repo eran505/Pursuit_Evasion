@@ -69,7 +69,14 @@ public:
 
     void getAllPos(vector<Point> &vec)const;
 
-    bool applyAction(agentEnum id, const Point &action, int max_speed);
+    bool applyAction( agentEnum id, const Point &action, int max_speed) {
+
+        this->dataPoint[id*2+1]+=action;
+        this->dataPoint[id*2+1].change_speed_max(max_speed);
+        this->dataPoint[id*2]+=this->dataPoint[id*2+1];
+        auto outBound = this->g_grid->is_wall(this->dataPoint[id*2]);
+        return outBound;
+    }
 
     [[nodiscard]] bool is_collusion(agentEnum id_player,agentEnum op_player)const;
     //void getAllPosOpponent(vector<Point> &results,char team);
@@ -90,7 +97,7 @@ public:
             seed ^= this->dataPoint[i].array[1] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
             seed ^= this->dataPoint[i].array[2] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
             if (i%2==0)
-                seed ^= this->budgets[i].hash_it() + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
+                seed ^= this->budgets.hash_it() + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
             if(i++==3) break;
         }
         seed ^=  this->dataPoint[2].accMulti(1) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
@@ -103,7 +110,8 @@ public:
         string sep="_";
         string str;
         str.append(this->time_t+"_");
-        for(int j =0;j<this->budgets.size();++j){
+        int agent_sizes = this->dataPoint.size()/2;
+        for(int j =0;j<agent_sizes;++j){
             string id_name = j==0?"A":"D";
             auto my_pos = this->dataPoint[j*2];
             auto my_speed =  this->dataPoint[j*2+1];
@@ -145,7 +153,7 @@ public:
     }
 
     void add_player_state(agentEnum name_id, const Point& m_pos, const Point& m_speed, S budget_b) {
-        this->set_budget(name_id,budget_b);
+        this->set_budget(budget_b);
         this->set_speed(name_id,m_speed);
         this->set_position(name_id,m_pos);
     }

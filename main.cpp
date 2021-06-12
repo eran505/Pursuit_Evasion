@@ -10,6 +10,7 @@
 //#include "Tests/test_exp.hpp"
 //#include "gtest/gtest.h"
 #include "Game/Sim.hpp"
+
 int main(int argc, char **argv) {
 
 //    ::testing::InitGoogleTest(&argc, argv);
@@ -36,10 +37,10 @@ int main(int argc, char **argv) {
     s.add_player_state(agentEnum::D,conf.posDefender.front(),Point(0),adata);
     cout<<s.to_string_state()<<endl;
     doPrint(cout,"hash:=",s.getHashValue());
-    std::unique_ptr<StaticPolicy> evder_agent = Initializer::init_attacker(conf);
-    std::unique_ptr<PRecAgent> pursurer_agent = Initializer::init_defender(conf);
+    auto evder_agent = Initializer::init_attacker(conf);
+    auto pursurer_agent = Initializer::init_defender(conf,evder_agent.get());
     auto sim  = Emulator(pursurer_agent.get(),evder_agent.get(), std::move(s));
-    sim.main_loop();
+    sim.main_loop(1000000);
 
     return 0;
 }
