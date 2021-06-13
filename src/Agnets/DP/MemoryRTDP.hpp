@@ -7,6 +7,7 @@
 
 #include "States/State.hpp"
 #include "Rewards.hpp"
+#include "../TrajectoriesTree.hpp"
 
 typedef float Cell;
 typedef std::vector<Cell> Row;
@@ -20,11 +21,11 @@ class MemoryRtdp{
     Randomizer rand;
     u_int32_t agent_max_speed = 1;
     agentEnum my_id = agentEnum::D;
-
+    TrajectoriesTree trajectories_tree;
 
 public:
-    explicit MemoryRtdp(int seed):Qtable(std::make_unique<std::unordered_map<Entry ,Row>>()),
-    id_to_point(Point::getVectorActionUniqie()),rand(seed)
+    explicit MemoryRtdp(int seed,TrajectoriesTree &&_trajectories_tree):Qtable(std::make_unique<std::unordered_map<Entry ,Row>>()),
+    id_to_point(Point::getVectorActionUniqie()),rand(seed),trajectories_tree(_trajectories_tree)
     {
         hash_func=[](const State<> &ptrS){return ptrS.getHashValue();};
     }
@@ -89,9 +90,6 @@ void MemoryRtdp::heuristic(const State<>& s,Entry entry_index)
     vector<State<>> vec_q;
     auto oldState = State(s);
 
-
-    bool isDebug=false;
-
     size_t ctr=-1;
     for (const auto &item_action : this->id_to_point)
     {
@@ -110,9 +108,6 @@ void MemoryRtdp::heuristic(const State<>& s,Entry entry_index)
         else
             val=(this->R.CollReward)*std::pow(R.discountF,step);
 
-//        if (isDebug)
-//            cout<<"  ["<<ctr<<"]="<<" step: "<<step<<" [s]->"<<oldState.to_string_state()<<" val="<<val<<endl;
-//
         oldState.assignment(s,this->my_id);
         // insert to Q table
         this->set_value_matrix(entry_index,item_action.hashMeAction(Point::actionMax) ,val);
@@ -121,7 +116,8 @@ void MemoryRtdp::heuristic(const State<>& s,Entry entry_index)
 }
 
 int MemoryRtdp::to_closet_path_H(const State<> &s) {
-    return 0;
+    //return 0;
+    return this->trajectories_tree.get_min_steps(s);
 }
 
 void MemoryRtdp::set_value_matrix(Entry entry, size_t second_entry, Cell val) {

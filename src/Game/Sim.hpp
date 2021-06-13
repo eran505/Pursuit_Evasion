@@ -30,10 +30,11 @@ public:
         pursuer->reset_policy();
         evader->reset_policy();
         reset_state();
+        //std::cout<<"run: "<<episodes<<"\tS:"<<s_state.to_string_state()<<endl;
 
         while(true)
         {
-            //std::cout<<"run: "<<episodes<<"\tS:"<<s_state.to_string_state()<<endl;
+
 
             set_jump();
 
@@ -41,11 +42,12 @@ public:
             take_action_evader();
 
             s_state.time_t+=s_state.jump;
-
+            episodes++;
+            //std::cout<<"run: "<<episodes<<"\tS:"<<s_state.to_string_state()<<endl;
             if (check_condition())
                 break;
 
-            episodes++;
+
 
         }
 

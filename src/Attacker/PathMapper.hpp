@@ -139,10 +139,10 @@ private:
 
     void crate_maper()
     {
-        std::unordered_map<uint64_t,vector<K>> mapper;
+
         for(int i=0;i<size_pathz;++i)
         {
-            u_int8_t time_t=0;
+
             for (const auto &item:all_paths[i])
             {
                 u_int64_t h= item.getHashStateAttacker();
@@ -154,7 +154,7 @@ private:
                 else{
                     pos->second.push_back(i);
                 }
-                time_t++;
+
             }
         }
         char sep=';';

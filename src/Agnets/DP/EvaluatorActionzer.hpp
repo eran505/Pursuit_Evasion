@@ -20,24 +20,23 @@ public:
 
     Cell evalute_state(const State<> &s,double transition_probability);
 
-    u_int64_t eval_states(vector<tuple<StatePoint, int, double>> &arr, State<> &s);
+    Cell eval_states(vector<tuple<StatePoint, int, double>> &arr, State<> &s);
 
     tuple<double, bool> EvalState2(const State<> &s);
 };
 
 
 
-u_int64_t Evaluator::eval_states(vector<tuple<StatePoint, int, double>> &arr,State<> &s) {
+Cell Evaluator::eval_states(vector<tuple<StatePoint, int, double>> &arr,State<> &s) {
+    Cell expected_sum_reward=0;
     for(const auto& itemL:arr)
     {
         auto state_point = std::get<0>(itemL);
-        s.set_speed(this->p,state_point.speed);
-        s.set_speed(this->p,state_point.pos);
-        auto some_val = std::get<1>(itemL);
-        auto prob = std::get<2>(itemL);
-
+        s.set_speed(this->e,state_point.speed);
+        s.set_position(this->e,state_point.pos);
+        expected_sum_reward+=evalute_state(s,std::get<2>(itemL));
     }
-    return 0;
+    return expected_sum_reward;
 }
 Cell Evaluator::evalute_state(const State<> &s, double transition_probability) {
     auto steps = s.jump;

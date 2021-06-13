@@ -30,7 +30,8 @@ public:
     }
     static std::unique_ptr<RTDP> init_RTDP(const configGame& conf,const StaticPolicy* e)
     {
-        auto agent_p = std::make_unique<RTDP>(e,conf._seed);
+        Point start_p = conf.posDefender.front();
+        auto agent_p = std::make_unique<RTDP>(e,conf._seed,conf.posDefender);
         return std::move(agent_p);
 
     }

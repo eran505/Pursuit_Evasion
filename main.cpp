@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
     auto evder_agent = Initializer::init_attacker(conf);
     auto pursurer_agent = Initializer::init_RTDP(conf,evder_agent.get());
     auto sim  = Emulator(pursurer_agent.get(),evder_agent.get(), std::move(s));
-    sim.main_loop(2);
+    sim.main_loop(10000);
 
     return 0;
 }
