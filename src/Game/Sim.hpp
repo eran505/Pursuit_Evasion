@@ -15,6 +15,8 @@ class Emulator{
     u_int32_t max_episodes=100;
     Logger logger;
 
+
+
 public:
 
     Emulator(P* p , E* e , State<> &&s)
@@ -22,27 +24,36 @@ public:
 
     void game_sim()
     {
+
         u_int32_t episodes=0;
-        evader->reset_policy();
+
         pursuer->reset_policy();
+        evader->reset_policy();
+        reset_state();
+
         while(true)
         {
             //std::cout<<"run: "<<episodes<<"\tS:"<<s_state.to_string_state()<<endl;
 
-            auto action_p = pursuer->get_action(s_state);
-            s_state.applyAction(this->pursuer->get_id(),action_p,1);
+            set_jump();
 
-            evader->make_action(s_state);
+            take_action_pursuer();
+            take_action_evader();
+
+            s_state.time_t+=s_state.jump;
 
             if (check_condition())
                 break;
+
             episodes++;
 
         }
+
         logger.print();
     }
     void main_loop(u_int32_t num_of_games)
     {
+        auto s_start = State<>(s_state);
         for (int i = 0; i < num_of_games; ++i) {
             game_sim();
         }
@@ -98,6 +109,25 @@ public:
     inline bool is_absolut_wall(const Point& pos_D)
     {
         return this->s_state.g_grid->is_wall(pos_D);
+    }
+
+    void reset_state()
+    {
+        this->evader->set_start_point(s_state);
+        this->pursuer->set_start_point(s_state);
+    }
+    void take_action_pursuer()
+    {
+        auto action_p = pursuer->get_action(s_state);
+        s_state.applyAction(this->pursuer->get_id(),action_p,s_state.jump);
+    }
+    void take_action_evader()
+    {
+        evader->make_action(s_state);
+    }
+    void set_jump()
+    {
+        s_state.jump=1;
     }
 };
 

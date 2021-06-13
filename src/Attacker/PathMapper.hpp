@@ -128,6 +128,13 @@ public:
         cout<<"P:\t"<<this->current_path<<endl;
         return this->current_path;
     }
+
+    StatePoint get_cur_position()
+    {
+        assert(time_t==0);
+        return all_paths[this->current_path][time_t];
+    }
+
 private:
 
     void crate_maper()

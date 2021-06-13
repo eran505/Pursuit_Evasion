@@ -9,30 +9,20 @@
 
 
 
-typedef float valueType;
-struct Rewards {
-public:
-    valueType CollReward = 1;
-    valueType GoalReward = -0.9;
-    valueType WallReward = -1;
-    valueType Step_reward = 0;
-    valueType discountF=0.987;//0.987;
-    static Rewards getRewards()
-    {
-        return Rewards();
-    }
-};
+
 
 
 class ActionExpend{
-    StaticPolicy other;
-    vector<tuple<StatePoint,int,double>> expander_attacker(const State<> &s_state,int jumps)
+    const StaticPolicy *other;
+public:
+    vector<tuple<StatePoint,int,double>> expander_attacker(const State<> &s_state);
+    explicit ActionExpend(const StaticPolicy* _other):other(_other){}
 };
 
 
-vector<tuple<StatePoint,int,double>> ActionExpend::expander_attacker(const State<> &s_state,int jumps)
+vector<tuple<StatePoint,int,double>> ActionExpend::expander_attacker(const State<> &s_state)
 {
-    return other->weighted_next_partial_state(s_state,jumps);
+    return other->weighted_next_partial_state(s_state,s_state.jump);
 }
 
 #endif //PE_ACTIONEXPENDER_H

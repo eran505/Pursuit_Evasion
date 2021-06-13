@@ -19,7 +19,7 @@ namespace RtdpUtils {
                 :state(state_val),action(action_val),entryID(entryID_val){}
 
         [[nodiscard]] string to_string() const {
-            return "{ " + state.to_string_state() + " , " + action.to_str()+ " }";
+            return "{"+state.to_string_state() + ", " + action.to_str()+ "}";
         }
 
 

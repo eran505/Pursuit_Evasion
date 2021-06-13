@@ -21,11 +21,18 @@ public:
     std::array<Point,4> dataPoint; // [A_POS,A_SPEED,D_POS,D_SPEED]
     //std::array<int,2> budgets{};
     u_int32_t time_t=0;
+    u_int32_t jump=1;
     S budgets;
     Grid *g_grid = nullptr;
     bool takeOff = false;
 
-
+    void assignment(const State<> &other, agentEnum idname) {
+        this->dataPoint[idname*2+1]=other.dataPoint[idname*2+1];
+        this->dataPoint[idname*2]=other.dataPoint[idname*2];
+        this->budgets=other.budgets;
+        this->jump = other.jump;
+        this->time_t=other.time_t;
+    }
 
     [[nodiscard]] const Point& get_speed_ref(agentEnum agent_id)const{return dataPoint[agent_id*2+1];}
     [[nodiscard]] Point get_speed(agentEnum agent_id)const{return dataPoint[agent_id*2+1];}
@@ -58,11 +65,15 @@ public:
 
     [[nodiscard]] vector<float> state_to_features()const;
 
-    void assignment( State &other);
 
-    void assignment( const State *other,agentEnum idname);
+    bool is_collusion_radius(agentEnum id_player, agentEnum op_player, const Point &window)
+    {
+        Point dif = (this->get_position_ref(id_player)-this->get_position_ref(op_player)).AbsPoint();
+        if(dif<window)
+            return true;
+        return false;
+    }
 
-    [[nodiscard]] double isGoal(agentEnum idStr)const;
 
     [[nodiscard]] bool isEndState(agentEnum idStr)const;
 
@@ -78,7 +89,27 @@ public:
         return outBound;
     }
 
-    [[nodiscard]] bool is_collusion(agentEnum id_player,agentEnum op_player)const;
+
+
+    bool applyAction( agentEnum id,Point &action, int max_speed,int jumps) {
+
+        for (int k=0;k<jumps and k < 2 ;++k)
+        {
+            this->dataPoint[id*2+1]+=action;
+            this->dataPoint[id*2+1].change_speed_max(max_speed);
+            this->dataPoint[id*2]+=this->dataPoint[id*2+1];
+
+        }
+        if(jumps-2>0)
+        {
+            this->dataPoint[id*2+1]*=(jumps-2);
+            this->dataPoint[id*2]+=this->dataPoint[id*2+1];
+            this->dataPoint[id*2+1].change_speed_max(max_speed);
+        }
+        auto outBound = this->g_grid->is_wall(this->dataPoint[id*2]);
+        return outBound;
+    }
+
     //void getAllPosOpponent(vector<Point> &results,char team);
     std::ostream& operator<<(std::ostream &strm) const {
         return strm <<this->to_string_state();
@@ -96,10 +127,9 @@ public:
             seed ^= this->dataPoint[i].array[0] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
             seed ^= this->dataPoint[i].array[1] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
             seed ^= this->dataPoint[i].array[2] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
-            if (i%2==0)
-                seed ^= this->budgets.hash_it() + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
             if(i++==3) break;
         }
+        seed ^= this->budgets.hash_it() + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
         seed ^=  this->dataPoint[2].accMulti(1) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
         return seed;
     }
@@ -109,7 +139,7 @@ public:
     [[nodiscard]] string to_string_state() const {
         string sep="_";
         string str;
-        str.append(this->time_t+"_");
+        str.append(std::to_string(this->time_t)+"_");
         int agent_sizes = this->dataPoint.size()/2;
         for(int j =0;j<agent_sizes;++j){
             string id_name = j==0?"A":"D";
@@ -124,7 +154,10 @@ public:
             str+="|";
         }
         str.append(sep);
+
         str.append(this->budgets.to_string());
+        str.append(sep);
+        str.append(std::to_string(this->jump));
         return str;
 
     }
@@ -143,8 +176,13 @@ public:
     [[nodiscard]] std::vector<int> to_mini_vector() const;
 
 
-    bool is_collusion_radius(agentEnum id_player, agentEnum op_player, const Point &window);
-
+    bool is_collusion(agentEnum id_player,agentEnum op_player)const
+    {
+        if(this->dataPoint[id_player*2]==this->dataPoint[op_player*2])
+            return true;
+        else
+            return false;
+    }
 
     void add_player_state(agentEnum name_id, const Point &m_pos, const Point *m_speed, S budget_b) {
         this->dataPoint[name_id*2]=m_pos;
@@ -158,10 +196,25 @@ public:
         this->set_position(name_id,m_pos);
     }
 
-    bool applyAction(agentEnum id,  Point &action, int max_speed, int jumps);
     static State make_state_from_array(std::array<int,14> a);
 
+    void assignment(State<> &other)
+    {
+        for(int i=0;i<this->dataPoint.size()/2;i++)
+        {
+            auto enum_id = static_cast<agentEnum>(i);
+            this->set_position(enum_id,other.get_position_ref(enum_id));
+            this->set_speed(enum_id,other.get_speed_ref(enum_id));
+        }
+        this->budgets=other.budgets;
+        this->jump = other.jump;
+        this->time_t=other.time_t;
+    }
 
+    double isGoal(agentEnum idStr)const {
+        const auto& pos = dataPoint[idStr*2];
+        return this->g_grid->get_goal_reward(pos);
+    }
 };
 
 

@@ -7,7 +7,7 @@
 #include "utils/game_util.hpp"
 struct Single{
 public:
-    int x;
+    int x=0;
     explicit Single(int val): x(val){}
     Single()=default;
     [[nodiscard]] u_int64_t hash_it() const{

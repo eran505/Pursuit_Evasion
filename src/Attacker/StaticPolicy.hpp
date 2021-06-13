@@ -41,9 +41,15 @@ public:
     u_int32_t get_max_len_path(){return mapper->get_max_path_size();}
 
     ~StaticPolicy()  = default;
+
+    void set_start_point(State<> &s)
+    {
+        auto state_a = mapper->get_cur_position();
+        s.set_position(my_id,std::move(state_a.pos));
+        s.set_speed(my_id,std::move(state_a.speed));
+    }
     void reset_policy()
     {
-
         mapper->random_choose_path(randomizer.get_double());
         //time_step=0;
     }
@@ -79,7 +85,7 @@ public:
         assert(false);
         return nullptr;
     }
-    vector<tuple<StatePoint,int,double>> weighted_next_partial_state(const State<> &s,uint jumps) {
+    vector<tuple<StatePoint,int,double>> weighted_next_partial_state(const State<> &s,uint jumps) const{
         //cout<<"s: "<<s.to_string_state()<<"]  ";
         return mapper->get_next_states(get_hash_state(s),jumps);
     }

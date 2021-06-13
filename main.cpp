@@ -38,9 +38,9 @@ int main(int argc, char **argv) {
     cout<<s.to_string_state()<<endl;
     doPrint(cout,"hash:=",s.getHashValue());
     auto evder_agent = Initializer::init_attacker(conf);
-    auto pursurer_agent = Initializer::init_defender(conf,evder_agent.get());
+    auto pursurer_agent = Initializer::init_RTDP(conf,evder_agent.get());
     auto sim  = Emulator(pursurer_agent.get(),evder_agent.get(), std::move(s));
-    sim.main_loop(1000000);
+    sim.main_loop(2);
 
     return 0;
 }

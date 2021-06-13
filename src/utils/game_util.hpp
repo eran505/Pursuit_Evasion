@@ -490,50 +490,71 @@ public:
         static std::unique_ptr<unordered_map<unsigned int, Point>> getDictActionUniqie();
 };
 
-int getMaxDistance(const Point &a , const  Point &b );
-int getMaxDistancePos(const Point &a , const  Point &b );
-int range_random(int min, int max); //range : [min, max)
-vector<double> getTopK(int k,vector<double> &vec);
 
+    int getMaxDistance(const Point &a, const Point &b);
 
-inline double fastPow(double a, double b) {
-    union {
-        double d;
-        int x[2];
-    } u = { a };
-    u.x[1] = (int)(b * (u.x[1] - 1072632447) + 1072632447);
-    u.x[0] = 0;
-    return u.d;
-}
+    int getMaxDistancePos(const Point &a, const Point &b);
 
+    int range_random(int min, int max); //range : [min, max)
+    vector<double> getTopK(int k, vector<double> &vec);
 
-
-template <typename T>
-
-bool Contains( std::vector<double>& Vec, const double Element )
-{
-    if (std::find(Vec.begin(), Vec.end(), Element) != Vec.end())
-        return true;
-
-    return false;
-}
-
-template<typename K=uint32_t>
-auto map_transpose(const std::unordered_map<K,std::vector<K>> &dico)
-{
-    unordered_map<K,std::vector<K>> map;
-    for (auto [k,v]:dico)
+    template< typename V>
+    size_t get_max_index_random(std::vector<V> list_vec,std::default_random_engine &rng)
     {
-        for(auto &item:v)
-        {
-            if(auto pos = map.find(item);pos!=map.end())
-                pos->second.push_back(k);
-            else
-                map[item]={k};
-        }
+        std::shuffle(std::begin(list_vec), std::end(list_vec), rng);
+        return std::distance(list_vec.begin(),std::max_element(list_vec.begin(),list_vec.end()));
+
     }
-    return map;
-}
+
+    template< typename Arr>
+    u_int32_t arg_max_at_shuffle(const Arr &arr, std::default_random_engine generator){
+        vector<u_int32_t> listIdxs;
+        double max = -1;
+        max = *std::max_element(arr.begin(), arr.end());
+        listIdxs.reserve(1);
+        for (int i = 0; i < arr.size(); ++i) {
+            if (arr.operator[](i)==max)
+                listIdxs.emplace_back(i);
+        }
+        if (listIdxs.size()==1)
+            return listIdxs.front();
+        std::shuffle(listIdxs.begin(),listIdxs.end(),generator);
+        return listIdxs.front();
+    }
+
+    inline double fastPow(double a, double b) {
+        union {
+            double d;
+            int x[2];
+        } u = {a};
+        u.x[1] = (int) (b * (u.x[1] - 1072632447) + 1072632447);
+        u.x[0] = 0;
+        return u.d;
+    }
+
+
+    template<typename T>
+
+    bool Contains(std::vector<double> &Vec, const double Element) {
+        if (std::find(Vec.begin(), Vec.end(), Element) != Vec.end())
+            return true;
+
+        return false;
+    }
+
+    template<typename K=uint32_t>
+    auto map_transpose(const std::unordered_map<K, std::vector<K>> &dico) {
+        unordered_map<K, std::vector<K>> map;
+        for (auto[k, v]:dico) {
+            for (auto &item:v) {
+                if (auto pos = map.find(item);pos != map.end())
+                    pos->second.push_back(k);
+                else
+                    map[item] = {k};
+            }
+        }
+        return map;
+    }
 
 struct weightedPosition{
     Point speedPoint;
