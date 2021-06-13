@@ -23,8 +23,6 @@ int main(int argc, char **argv) {
     CSVReader reader(csv_path,',');
     vector<vector<string>> rowsCsv = reader.getDataCSV();
     auto conf = configGame(rowsCsv[1],3);
-    auto init  = Initializer();
-
 
     cout<<rowsCsv[0]<<endl;
     auto res = to_csv2(rowsCsv[0]);
@@ -40,7 +38,7 @@ int main(int argc, char **argv) {
     auto evder_agent = Initializer::init_attacker(conf);
     auto pursurer_agent = Initializer::init_RTDP(conf,evder_agent.get());
     auto sim  = Emulator(pursurer_agent.get(),evder_agent.get(), std::move(s));
-    sim.main_loop(10000);
+    sim.main_loop(1000);
 
     return 0;
 }

@@ -22,7 +22,6 @@ namespace RtdpUtils {
             return "{"+state.to_string_state() + ", " + action.to_str()+ "}";
         }
 
-
     };
 
     template<typename S>

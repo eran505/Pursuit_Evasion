@@ -117,6 +117,8 @@ public:
     {
         this->evader->set_start_point(s_state);
         this->pursuer->set_start_point(s_state);
+        s_state.time_t=0;
+        s_state.jump=0;
     }
     void take_action_pursuer()
     {
@@ -129,10 +131,22 @@ public:
     }
     void set_jump()
     {
-        s_state.jump=1;
-    }
-};
 
+        auto dif = Point::distance_min_step(s_state.get_position_ref(evader->get_id()),s_state.get_position_ref(pursuer->get_id()));
+        auto jumping = get_step_number(dif);
+        jumping=1;
+        s_state.jump=jumping;
+    }
+    static int get_step_number(int diff_dist)
+    {
+        double logme= log2(diff_dist);
+        int x = int(std::floor(logme))-3;
+        x = std::max(0,x);
+        int res = std::pow(2,x);
+        return res;
+    }
+
+};
 
 
 #endif //PE_SIM_HPP
