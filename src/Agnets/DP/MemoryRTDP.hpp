@@ -27,8 +27,8 @@ public:
     explicit MemoryRtdp(int seed,TrajectoriesTree &&_trajectories_tree):Qtable(std::make_unique<std::unordered_map<Entry ,Row>>()),
     id_to_point(Point::getVectorActionUniqie()),rand(seed),trajectories_tree(_trajectories_tree)
     {
-        //hash_func=[](const State<> &ptrS){return ptrS.getHashValue();};
-        hash_func=[](const State<> &ptrS){return ptrS.getHashValueGR();};
+        hash_func=[](const State<> &ptrS){return ptrS.getHashValue();};
+        //hash_func=[](const State<> &ptrS){return ptrS.getHashValueGR();};
     }
     std::pair<Point,u_int64_t> get_argMAx(const State<> &s);
     u_int64_t get_entry(const State<> &s);
@@ -43,7 +43,6 @@ public:
 };
 
 std::pair<Point, u_int64_t> MemoryRtdp::get_argMAx(const State<> &s) {
-
     auto entry_id = this->get_entry(s);
     const Row& row = this->get_row_qTable(s,entry_id);
     auto index = arg_max_at_shuffle<Row>(row,rand.generator);
@@ -52,7 +51,7 @@ std::pair<Point, u_int64_t> MemoryRtdp::get_argMAx(const State<> &s) {
 }
 
 u_int64_t MemoryRtdp::get_entry(const State<> &s){
-    this->hash_func(s);
+    return this->hash_func(s);
 }
 inline bool MemoryRtdp::isInQ(Entry id_state)
 {
@@ -118,7 +117,8 @@ void MemoryRtdp::heuristic(const State<>& s,Entry entry_index)
 
 int MemoryRtdp::to_closet_path_H(const State<> &s) {
     //return 0;
-    return this->trajectories_tree.get_min_steps(s);
+    //return this->trajectories_tree.get_min_steps(s);
+    return this->trajectories_tree.get_min_steps();
 }
 
 void MemoryRtdp::set_value_matrix(Entry entry, size_t second_entry, Cell val) {

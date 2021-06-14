@@ -24,7 +24,7 @@ public:
         all_paths = pathz;
 
     }
-
+    u_int32_t get_min_steps(){return 0;}
 
     u_int32_t get_min_steps(const State<> &s)
     {

@@ -92,7 +92,7 @@ string getRootDir()
     auto res = splitStr(getExePath(),"/");
     std::vector<string> root_vec;
     std::copy(res.begin(),res.begin()+2,std::back_inserter(root_vec));
-    return join(root_vec,"/");
+    return "/"+join(root_vec,"/");
 }
 
 

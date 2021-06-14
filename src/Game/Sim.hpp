@@ -7,6 +7,7 @@
 #include "Attacker/StaticPolicy.hpp"
 #include "GoalRec/AgentGR.hpp"
 #include "utils/logeer.h"
+#include "fileIO/processerCSV.hpp"
 template< typename P=PRecAgent, typename E=StaticPolicy >
 class Emulator{
     E* evader;
@@ -17,8 +18,8 @@ class Emulator{
 
 public:
 
-    Emulator(P* p , E* e , State<> &&s)
-            :evader(e),pursuer(p),s_state(s){}
+    Emulator(P* p , E* e , State<> &&s,const configGame &conf)
+            :evader(e),pursuer(p),s_state(s),logger(conf){}
 
     void game_sim()
     {
@@ -28,13 +29,12 @@ public:
         pursuer->reset_policy();
         evader->reset_policy();
         reset_state();
-#ifdef PRINT
-        std::cout<<"run: "<<episodes<<"\tS:"<<s_state.to_string_state()<<endl;
-#endif
         while(true)
         {
 
-
+#ifdef PRINT
+            std::cout<<"run: "<<episodes<<"\tS:"<<s_state.to_string_state()<<"\t";
+#endif
             set_jump();
 
             take_action_pursuer();
@@ -43,9 +43,7 @@ public:
 
             s_state.time_t+=s_state.jump;
             episodes++;
-#ifdef PRINT
-            std::cout<<"run: "<<episodes<<"\tS:"<<s_state.to_string_state()<<endl;
-#endif
+
             if (check_condition())
                 break;
 
@@ -127,6 +125,9 @@ public:
 
         pursuer->update_state(s_state);
         auto action_p = pursuer->get_action(s_state);
+        #ifdef PRINT
+        cout<<"[action] "<<action_p.to_str()<<endl;
+        #endif
         s_state.applyAction(this->pursuer->get_id(),action_p,this->pursuer->get_max_speed(),s_state.jump);
     }
     void take_action_evader()
@@ -135,23 +136,23 @@ public:
     }
     void set_jump()
     {
-
-        auto dif = Point::distance_min_step(s_state.get_position_ref(evader->get_id()),s_state.get_position_ref(pursuer->get_id()));
-        auto jumping = get_step_number(dif);
+        auto dif = get_dif(s_state.get_position_ref(evader->get_id()),s_state.get_position_ref(pursuer->get_id()));
+        auto jumping = get_step_number(dif.getMax());
         //cout<<"jumping:"<<jumping<<endl;
         //s_state.jump=1;
         s_state.jump=jumping;
     }
 
-    static int get_step_number(int diff_dist)
+    static int get_step_number(int max)
     {
-        double logme= log2(diff_dist);
-        int x = int(std::floor(logme))-3;
-        x = std::max(0,x);
-        int res = std::pow(2,x);
+        auto d = std::max((int(log2(max))+1)-3,0);
+        int res = std::pow(2,d);
         return res;
     }
-
+    static Point get_dif(const Point &e ,const Point& p)
+    {
+        return (e-p).AbsPoint();
+    }
 };
 
 
