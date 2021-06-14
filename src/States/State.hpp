@@ -13,7 +13,7 @@
 enum agentEnum :short{A=0,D=1,LAST=2};
 
 
-template<typename S = Single>
+template<typename S = Complex>
 class State{
 
 public:
@@ -53,10 +53,6 @@ public:
     [[maybe_unused]] [[nodiscard]] S& get_budget_ref()const{return budgets;}
 
     void set_budget(S b){budgets=b;}
-
-
-
-
 
     State():g_grid(nullptr),takeOff(false){};
 
@@ -133,6 +129,24 @@ public:
         seed ^=  this->dataPoint[2].accMulti(1) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
         return seed;
     }
+
+    [[nodiscard]] u_int64_t getHashValueGR()const {
+
+        //u_int64_t  seed = this->budgets[0];//+1000*this->budgets[0];
+        u_int64_t  seed = 0 ;
+        size_t i=agentEnum::D*2;
+        while(true)
+        {
+            seed ^= this->dataPoint[i].array[0] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
+            seed ^= this->dataPoint[i].array[1] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
+            seed ^= this->dataPoint[i].array[2] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
+            if(i++==3) break;
+        }
+        seed ^= this->budgets.hash_it() + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
+        seed ^=  this->dataPoint[2].accMulti(1) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        return seed;
+    }
+
 
 
 

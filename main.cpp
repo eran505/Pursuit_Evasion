@@ -30,15 +30,15 @@ int main(int argc, char **argv) {
     auto grid = Initializer::init_grid(conf.sizeGrid,conf.gGoals,conf.probGoals);
     State s;
     s.g_grid=grid.get();
-    auto adata = Single(1);
+    auto adata = Complex();
     s.add_player_state(agentEnum::A,conf.posAttacker.front(),zero,adata);
     s.add_player_state(agentEnum::D,conf.posDefender.front(),Point(0),adata);
     cout<<s.to_string_state()<<endl;
-    doPrint(cout,"hash:=",s.getHashValue());
+
     auto evder_agent = Initializer::init_attacker(conf);
     auto pursurer_agent = Initializer::init_RTDP(conf,evder_agent.get());
     auto sim  = Emulator(pursurer_agent.get(),evder_agent.get(), std::move(s));
-    sim.main_loop(1000);
+    sim.main_loop(2);
 
     return 0;
 }

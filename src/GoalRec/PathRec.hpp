@@ -13,45 +13,9 @@
 #include "utils/game_util.hpp"
 #define MAX_SPEED_E 2
 #define MAX_SPEED_P 1
+#include "NodeGR.hpp"
 //#define VERBOSE
 
-struct NodeG{
-    Point pos;
-    NodeG* parent;
-    vector<std::unique_ptr<NodeG>> child;
-    vector<pair<Point,std::vector<u_int16_t>>> goal_list;
-    vector<double> goal_likelihood;
-    int min_step=std::numeric_limits<int>::max();;
-
-    NodeG():pos(0),parent(nullptr),child(vector<std::unique_ptr<NodeG>>()),
-            goal_list(vector<pair<Point,std::vector<u_int16_t>>>()){}
-    explicit NodeG(const Point& p,const Point& g,u_int16_t id_path,double likelihood):pos(p),parent(nullptr),child(vector<std::unique_ptr<NodeG>>()),
-                                                                                      goal_list(vector<pair<Point,std::vector<u_int16_t>>>()){
-        this->goal_list.push_back({g,{id_path}});
-        this->goal_likelihood.push_back(likelihood);
-    }
-
-    template<typename P = Point>
-    void add_goal(P&& g,u_int16_t id_path,double likelihood)
-    {
-        auto it = std::find_if( goal_list.begin(), goal_list.end(),
-                                [&g](const std::pair<Point, std::vector<u_int16_t>>& element){ return element.first == g;} );
-
-        if (it==goal_list.end()) {
-            goal_list.push_back({std::forward<P>(g), {id_path}});
-            goal_likelihood.push_back(likelihood);
-
-        }
-        else {
-            it->second.push_back(id_path);
-            auto index_number = std::distance(goal_list.begin(), it);
-            assert(index_number>=0);
-            goal_likelihood[index_number]+=likelihood;
-            assert(goal_likelihood[index_number]>=0 and goal_likelihood[index_number]<=1 );
-
-        }
-    }
-};
 
 class GoalRecognition{
     std::vector<std::vector<Point>> all_pathz;
@@ -71,7 +35,7 @@ public:
         cout<<root->pos.to_str()<<endl;
         curr_ptr=root.get();
     }
-
+    NodeG* get_root(){return this->root.get(); ;}
     void set_my_location(const Point& p);
 
     void load_agent_paths(const std::vector<std::vector<Point>> &pathz,vector<double> &&path_probabilties);
@@ -81,6 +45,8 @@ public:
     static NodeG* search_node(const vector<std::unique_ptr<NodeG>> &continer,const Point& p);
 
     void printTree();
+
+    [[nodiscard]] NodeG* get_curr_ptr()const{return curr_ptr;};
 
     void reset_ptr()
     {
@@ -102,6 +68,7 @@ public:
 
     Point do_action(const Point &evader,const Point &my_speed );
 
+    void advance_curr_ptr(const Point &p);
 };
 
 
@@ -204,6 +171,10 @@ void GoalRecognition::search_tree(const Point &p, NodeG* ptr) {
 
 }
 
+void GoalRecognition::advance_curr_ptr(const Point &p)
+{
+    this->search_tree(p,curr_ptr);
+}
 
 
 

@@ -26,9 +26,11 @@ class StaticPolicy{
     unordered_map<int,Point*>* hashActionMap{};
     agentEnum my_id;
     Randomizer randomizer;
+    int max_speed;
+
 public:
     StaticPolicy(const Point &gridSize,uint maxSpeed,agentEnum id,u_int16_t num_of_paths,std::string home_path,const seq_goals& goals_points,const seq_starting& starting_points,int seed=4)
-    :gen(seed,gridSize,maxSpeed),randomizer(seed)
+    :gen(seed,gridSize,maxSpeed),randomizer(seed),max_speed(maxSpeed)
     {
         home = std::move(home_path);
         my_id=id;
@@ -41,7 +43,7 @@ public:
     u_int32_t get_max_len_path(){return mapper->get_max_path_size();}
 
     ~StaticPolicy()  = default;
-
+    int get_max_speed(){return max_speed;}
     void set_start_point(State<> &s)
     {
         auto state_a = mapper->get_cur_position();
@@ -61,7 +63,7 @@ public:
         try{
             string nameFileCsv="Q.csv";
             int size_action = this->hashActionMap->size();
-            csvfile csv(std::move(pathFile),";"); // throws exceptions!
+            csvfile csv(pathFile,";"); // throws exceptions!
             auto p_list = mapper->get_all_probabilites_ref();
             auto pathz_list = mapper->get_all_pathz_ref();
             for (int i = 0; i < p_list.size(); ++i) {
@@ -76,14 +78,10 @@ public:
     }
     void make_action(State<> &s)
     {
-        auto StatePoint = this->mapper->get_next_actual_state(1);
+        auto StatePoint = this->mapper->get_next_actual_state(s.jump);
         s.set_speed(this->get_id(),std::move(StatePoint.speed));
         s.set_position(this->get_id(),std::move(StatePoint.pos));
 
-    }
-    const vector<double>* TransitionAction(const State<> *s)const {
-        assert(false);
-        return nullptr;
     }
     vector<tuple<StatePoint,int,double>> weighted_next_partial_state(const State<> &s,uint jumps) const{
         //cout<<"s: "<<s.to_string_state()<<"]  ";

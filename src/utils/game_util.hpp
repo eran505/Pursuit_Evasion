@@ -11,7 +11,7 @@
 
 //#define PRINT
 #define APPEDN 13        //int append=int(pow(int(actionMax),this->capacity))/2;
-//#define PRINT
+#define PRINT
 //#include <execution>
 #include <string>
 #include <list>

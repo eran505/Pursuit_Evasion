@@ -15,8 +15,6 @@ class Emulator{
     u_int32_t max_episodes=100;
     Logger logger;
 
-
-
 public:
 
     Emulator(P* p , E* e , State<> &&s)
@@ -30,8 +28,9 @@ public:
         pursuer->reset_policy();
         evader->reset_policy();
         reset_state();
-        //std::cout<<"run: "<<episodes<<"\tS:"<<s_state.to_string_state()<<endl;
-
+#ifdef PRINT
+        std::cout<<"run: "<<episodes<<"\tS:"<<s_state.to_string_state()<<endl;
+#endif
         while(true)
         {
 
@@ -39,11 +38,14 @@ public:
             set_jump();
 
             take_action_pursuer();
+
             take_action_evader();
 
             s_state.time_t+=s_state.jump;
             episodes++;
-            //std::cout<<"run: "<<episodes<<"\tS:"<<s_state.to_string_state()<<endl;
+#ifdef PRINT
+            std::cout<<"run: "<<episodes<<"\tS:"<<s_state.to_string_state()<<endl;
+#endif
             if (check_condition())
                 break;
 
@@ -122,8 +124,10 @@ public:
     }
     void take_action_pursuer()
     {
+
+        pursuer->update_state(s_state);
         auto action_p = pursuer->get_action(s_state);
-        s_state.applyAction(this->pursuer->get_id(),action_p,s_state.jump);
+        s_state.applyAction(this->pursuer->get_id(),action_p,this->pursuer->get_max_speed(),s_state.jump);
     }
     void take_action_evader()
     {
@@ -134,9 +138,11 @@ public:
 
         auto dif = Point::distance_min_step(s_state.get_position_ref(evader->get_id()),s_state.get_position_ref(pursuer->get_id()));
         auto jumping = get_step_number(dif);
-        jumping=1;
+        //cout<<"jumping:"<<jumping<<endl;
+        //s_state.jump=1;
         s_state.jump=jumping;
     }
+
     static int get_step_number(int diff_dist)
     {
         double logme= log2(diff_dist);

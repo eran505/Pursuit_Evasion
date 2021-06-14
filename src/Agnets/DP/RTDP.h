@@ -12,6 +12,11 @@
 #include "ActionExpender.h"
 #include "EvaluatorActionzer.hpp"
 #include "../TrajectoriesTree.hpp"
+#include "../Policer.hpp"
+#include <type_traits>
+#include <typeinfo>
+
+
 typedef RtdpUtils::StackActionzer<RtdpUtils::StackItemRtdp> StackObject;
 
 class RTDP{
@@ -25,7 +30,7 @@ class RTDP{
     //std::shared_ptr<NodeG> root_evader_tree;
     ActionExpend action_expend;
     Evaluator evaluator;
-
+    DPGoalRec policer;
 public:
     explicit RTDP(const StaticPolicy *evader,int seed,const std::vector<Point> &l_starts);
     Point get_action(const State<> &s);
@@ -34,10 +39,13 @@ public:
     void set_start_point(State<> &s);
     void empty_stack();
     void update(const Point& a, State<>&& s,Entry id);
+    [[nodiscard]] int get_max_speed() const{return max_speed;}
+    void update_state(State<> &s);
 private:
     Cell bellman_update(State<> &&s , const Point &a);
-
     void do_SEQ(State<> &s, const Point &a);
+
+
 };
 
 RTDP::RTDP(const StaticPolicy *evader,int seed,const std::vector<Point> &l_starts):
@@ -46,7 +54,8 @@ RTDP::RTDP(const StaticPolicy *evader,int seed,const std::vector<Point> &l_start
     stack(),
     action_expend(evader),
     evaluator(memo_rtdp),
-    start_point(l_starts.front())
+    start_point(l_starts.front()),
+    policer(seed,evader->list_only_pos(),evader->get_copy_probabilities())
     {}
 
 
@@ -67,17 +76,19 @@ void RTDP::reset_policy() {
     stack.clear();
 }
 
-
+void RTDP::update_state(State<> &s)
+{
+    policer.update_state(s);
+    //cout<<s.to_string_state()<<endl;
+}
 
 Cell RTDP::bellman_update(State<> &&s ,const  Point &a){
 
     //apply the action on the state
-    //cout<<s.to_string_state()<<endl;
     do_SEQ(s,a);
-    //cout<<s.to_string_state()<<endl;
     //send for expend + eval
     auto seq_states = this->action_expend.expander_attacker(s);
-    Cell val = this->evaluator.eval_states(seq_states,s);
+    Cell val = this->evaluator.eval_states(seq_states,s,policer);
     return val;
 
 }
@@ -85,13 +96,16 @@ Cell RTDP::bellman_update(State<> &&s ,const  Point &a){
 void RTDP::set_start_point(State<> &s) {
     s.set_speed(my_id,Point(0));
     s.set_position(my_id,Point(start_point));
+    policer.reset_state(s);
 
 }
 
 void RTDP::empty_stack() {
 
     if(this->stack.is_empty()) return;
-
+#ifdef PRINT
+    stack.print_stak();
+#endif
     while(!this->stack.is_empty()) {
         auto& item = this->stack.pop();
         //this->evaluator->change_scope_(&item.state);

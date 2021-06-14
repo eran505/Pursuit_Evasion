@@ -27,7 +27,8 @@ public:
     explicit MemoryRtdp(int seed,TrajectoriesTree &&_trajectories_tree):Qtable(std::make_unique<std::unordered_map<Entry ,Row>>()),
     id_to_point(Point::getVectorActionUniqie()),rand(seed),trajectories_tree(_trajectories_tree)
     {
-        hash_func=[](const State<> &ptrS){return ptrS.getHashValue();};
+        //hash_func=[](const State<> &ptrS){return ptrS.getHashValue();};
+        hash_func=[](const State<> &ptrS){return ptrS.getHashValueGR();};
     }
     std::pair<Point,u_int64_t> get_argMAx(const State<> &s);
     u_int64_t get_entry(const State<> &s);

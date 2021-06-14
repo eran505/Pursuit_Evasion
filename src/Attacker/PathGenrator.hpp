@@ -103,8 +103,8 @@ private:
     {
         vector<AStar::StatePoint> seq_state;
         vector<AStar::StatePoint> seq_state_all;
-        //auto new_list = add_middle_point_at_random(A_list);
-        auto new_list=A_list;
+        auto new_list = add_middle_point_at_random(A_list);
+        //auto new_list=A_list;
         cout<<new_list<<endl;
         if(new_list.size()==3)
         {
