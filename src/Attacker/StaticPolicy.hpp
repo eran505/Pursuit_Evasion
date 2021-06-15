@@ -27,10 +27,10 @@ class StaticPolicy{
     agentEnum my_id;
     Randomizer randomizer;
     int max_speed;
-
+    string exp_id;
 public:
-    StaticPolicy(const Point &gridSize,uint maxSpeed,agentEnum id,u_int16_t num_of_paths,std::string home_path,const seq_goals& goals_points,const seq_starting& starting_points,int seed=4)
-    :gen(seed,gridSize,maxSpeed),randomizer(seed),max_speed(maxSpeed)
+    StaticPolicy(const Point &gridSize,uint maxSpeed,agentEnum id,u_int16_t num_of_paths,std::string home_path,const seq_goals& goals_points,const seq_starting& starting_points,int seed,string id_exp)
+    :gen(seed,gridSize,maxSpeed),randomizer(seed),max_speed(maxSpeed),exp_id(std::move(id_exp))
     {
         home = std::move(home_path);
         my_id=id;
@@ -42,8 +42,10 @@ public:
     agentEnum get_id(){return my_id;}
     u_int32_t get_max_len_path(){return mapper->get_max_path_size();}
 
-    ~StaticPolicy()  = default;
-    int get_max_speed(){return max_speed;}
+    ~StaticPolicy(){
+        policy_data();
+    };
+    int get_max_speed() const{return max_speed;}
     void set_start_point(State<> &s)
     {
         auto state_a = mapper->get_cur_position();
@@ -57,12 +59,11 @@ public:
     }
     void policy_data()const {
 
-        string pathFile=this->home+"/car_model/debug/p.csv";
+        string pathFile=this->home+"/car_model/debug/p_"+exp_id+".csv";
 
         //print Q table--------------------------------
         try{
-            string nameFileCsv="Q.csv";
-            int size_action = this->hashActionMap->size();
+
             csvfile csv(pathFile,";"); // throws exceptions!
             auto p_list = mapper->get_all_probabilites_ref();
             auto pathz_list = mapper->get_all_pathz_ref();

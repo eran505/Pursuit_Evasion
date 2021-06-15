@@ -21,9 +21,10 @@ public:
         return std::move(std::make_unique<Grid>(grid_szie,Point(0),gGoals,probGoals));
     }
 
-    static std::unique_ptr<PRecAgent> init_GR(const configGame& conf,const StaticPolicy* e)
+    static std::unique_ptr<PRecAgent> init_GR(configGame& conf,const StaticPolicy* e)
     {
-        auto agent_p = std::make_unique<PRecAgent>(conf.maxD,agentEnum::D,conf.home,conf._seed);
+        conf.eval_mode=-1;
+        auto agent_p = std::make_unique<PRecAgent>(conf.maxD,agentEnum::D,conf.home,conf._seed,conf.posDefender);
         agent_p->intial_args(e->list_only_pos(),e->get_copy_probabilities());
         return std::move(agent_p);
 
@@ -31,7 +32,7 @@ public:
     static std::unique_ptr<RTDP> init_RTDP(const configGame& conf,const StaticPolicy* e)
     {
         Point start_p = conf.posDefender.front();
-        auto agent_p = std::make_unique<RTDP>(e,conf._seed,conf.posDefender);
+        auto agent_p = std::make_unique<RTDP>(e,conf._seed,conf.posDefender,conf.eval_mode);
         return std::move(agent_p);
 
     }
@@ -53,7 +54,7 @@ public:
         for(auto &p:conf.posAttacker) listPointAttacker.emplace_back(Point(0,0,0),p,1.0);
 
         return std::make_unique<StaticPolicy>(conf.sizeGrid,conf.maxA,agentEnum::A,
-                                              conf.rRoutes,conf.home,lStartingPointGoal,listPointAttacker,conf._seed);
+                                              conf.rRoutes,conf.home,lStartingPointGoal,listPointAttacker,conf._seed,conf.idNumber);
 
 
     }

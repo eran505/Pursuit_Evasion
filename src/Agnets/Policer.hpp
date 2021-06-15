@@ -8,9 +8,23 @@
 #include "utils/game_util.hpp"
 #include "States/State.hpp"
 #include "GoalRec/PathRec.hpp"
+class Policer{
 
+public:
+    virtual void update_state(State<> &s)
+    {}
+
+    virtual void reset_state(State<> &s)
+    {}
+
+    virtual void search(State<> &s)
+    {
+
+    }
+
+};
 typedef vector<vector<Point>> vector_paths;
-class DPGoalRec{
+class DPGoalRec:public Policer{
 
     GoalRecognition GR;
     agentEnum e = agentEnum::A;
@@ -37,23 +51,20 @@ public:
     }
     void search(State<> &s)
     {
+
         const Point& evader_position = s.get_position_ref(e);
         GR.search_tree(evader_position,s.budgets.ptr);
         s.budgets=GR.get_curr_ptr();
+        if (s.budgets.ptr->pos!=s.get_position_ref(agentEnum::A)){
+            cout<<s.to_string_state()<<endl;
+            assert(false);
+        }
+
     }
 
 };
 
 
-class Dummy{
 
-public:
-
-    void update_state(State<> &s)
-    {}
-    void reset_state(State<> &s)
-    {}
-
-};
 
 #endif //PE_POLICER_HPP

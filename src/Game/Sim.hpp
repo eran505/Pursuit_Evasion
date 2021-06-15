@@ -8,50 +8,50 @@
 #include "GoalRec/AgentGR.hpp"
 #include "utils/logeer.h"
 #include "fileIO/processerCSV.hpp"
+#include "utils/Jumper.h"
 template< typename P=PRecAgent, typename E=StaticPolicy >
 class Emulator{
     E* evader;
     P* pursuer;
     State<> s_state;
-    u_int32_t max_episodes=100;
     Logger logger;
-
+    int episodes=0;
+    std::function<int(const Point&,const Point&)> jump_func;
 public:
 
     Emulator(P* p , E* e , State<> &&s,const configGame &conf)
-            :evader(e),pursuer(p),s_state(s),logger(conf){}
+    :evader(e),pursuer(p),s_state(s),logger(conf)
+    {
+        jump_func=Jumper::get_jumps;
+        if(conf.eval_mode==-1)
+            jump_func = [](const Point&,const Point&){return 1;};
+    }
 
     void game_sim()
     {
 
-        u_int32_t episodes=0;
+        episodes=0;
 
         pursuer->reset_policy();
         evader->reset_policy();
         reset_state();
         while(true)
         {
-
-#ifdef PRINT
-            std::cout<<"run: "<<episodes<<"\tS:"<<s_state.to_string_state()<<"\t";
-#endif
             set_jump();
 
             take_action_pursuer();
 
             take_action_evader();
 
-            s_state.time_t+=s_state.jump;
+            s_state.state_time+=s_state.jump;
+
             episodes++;
 
             if (check_condition())
                 break;
 
-
-
         }
 
-        logger.print();
     }
     void main_loop(u_int32_t num_of_games)
     {
@@ -117,7 +117,7 @@ public:
     {
         this->evader->set_start_point(s_state);
         this->pursuer->set_start_point(s_state);
-        s_state.time_t=0;
+        s_state.state_time=0;
         s_state.jump=0;
     }
     void take_action_pursuer()
@@ -125,10 +125,12 @@ public:
 
         pursuer->update_state(s_state);
         auto action_p = pursuer->get_action(s_state);
-        #ifdef PRINT
+#ifdef PRINT
+        std::cout<<"run: "<<episodes<<"\t[state] "<<s_state.to_string_state()<<"\t";
         cout<<"[action] "<<action_p.to_str()<<endl;
-        #endif
+#endif
         s_state.applyAction(this->pursuer->get_id(),action_p,this->pursuer->get_max_speed(),s_state.jump);
+
     }
     void take_action_evader()
     {
@@ -136,23 +138,12 @@ public:
     }
     void set_jump()
     {
-        auto dif = get_dif(s_state.get_position_ref(evader->get_id()),s_state.get_position_ref(pursuer->get_id()));
-        auto jumping = get_step_number(dif.getMax());
-        //cout<<"jumping:"<<jumping<<endl;
+        auto jumping = jump_func(s_state.get_position_ref(evader->get_id()),s_state.get_position_ref(pursuer->get_id()));
         //s_state.jump=1;
         s_state.jump=jumping;
     }
 
-    static int get_step_number(int max)
-    {
-        auto d = std::max((int(log2(max))+1)-3,0);
-        int res = std::pow(2,d);
-        return res;
-    }
-    static Point get_dif(const Point &e ,const Point& p)
-    {
-        return (e-p).AbsPoint();
-    }
+
 };
 
 

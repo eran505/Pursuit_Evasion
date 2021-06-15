@@ -20,7 +20,7 @@ public:
 
     std::array<Point,4> dataPoint; // [A_POS,A_SPEED,D_POS,D_SPEED]
     //std::array<int,2> budgets{};
-    u_int32_t time_t=0;
+    u_int32_t state_time=0;
     u_int32_t jump=1;
     S budgets;
     Grid *g_grid = nullptr;
@@ -31,7 +31,7 @@ public:
         this->dataPoint[idname*2]=other.dataPoint[idname*2];
         this->budgets=other.budgets;
         this->jump = other.jump;
-        this->time_t=other.time_t;
+        this->state_time=other.state_time;
     }
 
     [[nodiscard]] const Point& get_speed_ref(agentEnum agent_id)const{return dataPoint[agent_id*2+1];}
@@ -117,7 +117,6 @@ public:
         //u_int64_t  seed = this->budgets[0];//+1000*this->budgets[0];
         u_int64_t  seed = 0 ;
         size_t i=0;
-
         while(true)
         {
             seed ^= this->dataPoint[i].array[0] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
@@ -127,7 +126,7 @@ public:
 
         }
         //seed ^= this->budgets.hash_it() + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
-
+        //seed ^= time_t +  + 0x9e3779b9 + (seed << 6) + (seed >> 2);
         seed ^=  this->dataPoint[2].accMulti(1) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 
         return seed;
@@ -136,18 +135,18 @@ public:
     [[nodiscard]] u_int64_t getHashValueGR()const {
 
         //u_int64_t  seed = this->budgets[0];//+1000*this->budgets[0];
-        u_int64_t  seed = 0 ;
-        size_t i=agentEnum::D*2;
-        while(true)
-        {
+        u_int64_t  seed = this->budgets.hash_it();
+        //seed =0;
+        seed ^= this->dataPoint[agentEnum::D*2+1].array[0] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
+        seed ^= this->dataPoint[agentEnum::D*2+1].array[1] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
+        seed ^= this->dataPoint[agentEnum::D*2+1].array[2] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
 
-            seed ^= this->dataPoint[i].array[0] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
-            seed ^= this->dataPoint[i].array[1] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
-            seed ^= this->dataPoint[i].array[2] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
-            if(i++==3) break;
-        }
-        seed ^= this->budgets.hash_it() + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
-        seed ^=  this->dataPoint[2].accMulti(1) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        seed ^= this->dataPoint[agentEnum::D*2].array[0] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
+        seed ^= this->dataPoint[agentEnum::D*2].array[1] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
+        seed ^= this->dataPoint[agentEnum::D*2].array[2] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
+
+        seed ^= this->state_time + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
+
         return seed;
     }
 
@@ -157,7 +156,7 @@ public:
     [[nodiscard]] string to_string_state() const {
         string sep="_";
         string str;
-        str.append(std::to_string(this->time_t)+"_");
+        str.append(std::to_string(this->state_time)+"_");
         int agent_sizes = this->dataPoint.size()/2;
         for(int j =0;j<agent_sizes;++j){
             string id_name = j==0?"A":"D";
@@ -226,13 +225,41 @@ public:
         }
         this->budgets=other.budgets;
         this->jump = other.jump;
-        this->time_t=other.time_t;
+        this->time_t=other.state_time;
     }
 
-    double isGoal(agentEnum idStr)const {
+    [[nodiscard]] double isGoal(agentEnum idStr)const {
         const auto& pos = dataPoint[idStr*2];
         return this->g_grid->get_goal_reward(pos);
     }
+    [[nodiscard]] string to_str_gr() const {
+        string sep="_";
+        string str;
+        //str.append(std::to_string(this->time_t)+"_");
+        int agent_sizes = this->dataPoint.size()/2;
+        for(int j =0;j<agent_sizes;++j){
+            string id_name = j==0?"A":"D";
+            auto my_pos = this->dataPoint[j*2];
+            auto my_speed =  this->dataPoint[j*2+1];
+
+            str.append(id_name);
+            str.append(sep);
+            str.append(my_pos.to_str());
+            str.append(sep);
+            if(id_name=="D")
+                str.append(my_speed.to_str());
+            str+="|";
+        }
+        str.append(sep);
+
+        str.append(this->budgets.to_string());
+        str.append(std::to_string(this->state_time));
+//        str.append(sep);
+//        str.append(std::to_string(this->jump));
+        return str;
+
+    }
+
 };
 
 

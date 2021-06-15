@@ -24,11 +24,11 @@ struct NodeG{
 
     u_int64_t hash_it()
     {
-        auto hash_number = pos.expHash();
+        u_int64_t hash_number = pos.hashConst();
+        hash_number = pos.expHash();
         for (const auto& item : goal_list) {
-            for(const auto& path_id : item.second)
-            {
-                hash_number ^=  (path_id * 2654435761) + 2654435769 + (hash_number << 6) + (hash_number >> 2);
+            for(const auto& path_id : item.second){
+                hash_number ^=  ((path_id+10) * 2654435761) + 2654435769 + (hash_number << 6) + (hash_number >> 2);
             }
         }
         return hash_number;

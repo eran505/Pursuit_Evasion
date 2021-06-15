@@ -19,6 +19,7 @@
 
 class GoalRecognition{
     std::vector<std::vector<Point>> all_pathz;
+    //std::unique_ptr<std::unordered_map<u_int64_t,NodeG*>> node_dict;
     std::unique_ptr<NodeG> root;
     NodeG* curr_ptr;
     std::vector<u_int32_t> min_step_path;
@@ -50,12 +51,13 @@ public:
 
     void reset_ptr()
     {
+
         curr_ptr= root.get();
         start_move=false;
         this->found_path=-1;
-        //set_my_location(this->my_loction);
+        set_my_location(my_loction);
     }
-
+    Point get_my_loc(){return this->my_loction;}
     void search_tree(const Point &p, NodeG* ptr);
     bool is_stay_inplace(const Point &evader);
     size_t make_decsion(const Point &evader);
@@ -69,6 +71,7 @@ public:
     Point do_action(const Point &evader,const Point &my_speed );
 
     void advance_curr_ptr(const Point &p);
+    static std::vector<NodeG*> get_all_successors(NodeG* ptr,u_int32_t steps);
 };
 
 
@@ -219,6 +222,7 @@ size_t GoalRecognition::make_decsion(const Point &evader ) {
 }
 
 void GoalRecognition::populate_distances() {
+    //cout<<my_loction.to_str()<<endl;
     assert(my_loction.sum()>0);
     for(const auto& path_i : this->all_pathz)
         this->min_step_path.push_back(getMaxDistance(path_i[path_i.size()-2], this->my_loction));
@@ -292,6 +296,50 @@ Point GoalRecognition::do_action(const Point &evader,const Point &my_speed) {
     Point dif = goal_loc-my_loction;
     dif.change_speed_max(MAX_SPEED_P);
     return dif-my_speed;
+}
+
+//void GoalRecognition::build_fast_node_dict() {
+//    auto q = std::queue<NodeG*>();
+//    q.push(this->root.get());
+//    while (!q.empty())
+//    {
+//        NodeG* cur = q.front();
+//        q.pop();
+//        node_dict->try_emplace(cur->hash_it(),cur);
+//        for (auto & i : cur->child) {
+//            q.push(i.get());
+//        }
+//    }
+//
+//
+//}
+//
+//NodeG *GoalRecognition::fast_search(u_int64_t id_hash) const {
+//    return this->node_dict->at(id_hash);
+//}
+
+std::vector<NodeG *> GoalRecognition::get_all_successors(NodeG *ptr, u_int32_t steps) {
+    auto results = std::vector<NodeG *>();
+    auto q = std::queue<NodeG*>();
+    q.push(ptr);
+    auto q_depth = std::queue<int>();
+    q_depth.push(steps);
+    while (!q.empty())
+    {
+        NodeG* cur = q.front();
+        q.pop();
+        int depth = q_depth.front();
+        q_depth.pop();
+        if (depth==0 or cur->child.empty()){
+            results.push_back(cur);
+            continue;
+        }
+        for (auto & i : cur->child) {
+            q.push(i.get());
+            q_depth.push(--depth);
+        }
+    }
+    return results;
 }
 
 

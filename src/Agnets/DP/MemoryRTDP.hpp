@@ -22,13 +22,18 @@ class MemoryRtdp{
     u_int32_t agent_max_speed = 1;
     agentEnum my_id = agentEnum::D;
     TrajectoriesTree trajectories_tree;
-
+    std::unordered_map<u_int64_t,vector<string>> debug_map;
 public:
-    explicit MemoryRtdp(int seed,TrajectoriesTree &&_trajectories_tree):Qtable(std::make_unique<std::unordered_map<Entry ,Row>>()),
-    id_to_point(Point::getVectorActionUniqie()),rand(seed),trajectories_tree(_trajectories_tree)
+    explicit MemoryRtdp(int seed,TrajectoriesTree &&_trajectories_tree,int mode):Qtable(std::make_unique<std::unordered_map<Entry ,Row>>()),
+    id_to_point(Point::getVectorActionUniqie()),rand(seed),trajectories_tree(std::move(_trajectories_tree))
     {
-        hash_func=[](const State<> &ptrS){return ptrS.getHashValue();};
-        //hash_func=[](const State<> &ptrS){return ptrS.getHashValueGR();};
+        if (mode == 0)
+            hash_func=[](const State<> &ptrS){return ptrS.getHashValue();};
+        else if(mode==1)
+            hash_func=[](const State<> &ptrS){return ptrS.getHashValueGR();};
+        else
+            hash_func=[](const State<> &ptrS){return ptrS.getHashValue();};
+
     }
     std::pair<Point,u_int64_t> get_argMAx(const State<> &s);
     u_int64_t get_entry(const State<> &s);
@@ -62,9 +67,21 @@ inline bool MemoryRtdp::isInQ(Entry id_state)
 }
 const Row& MemoryRtdp::get_row_qTable(const State<> &s,Entry id_state)
 {
+
     if(!isInQ(id_state)){
         Q_table_add_row(s,id_state);
     }
+//    if (auto pos = debug_map.find(id_state);pos==debug_map.end()){
+//        auto x=debug_map.try_emplace(id_state);
+//        x.first->second={s.to_str_gr()};
+//    }else{
+//        if(pos->second.front() != s.to_str_gr())
+//        {
+//            cout<<"\t\told:"<<pos->second.front()<<"\n\t\tnew:"<<s.to_str_gr()<<"\n"<<endl;
+//            assert(false);
+//        }
+//    }
+
     return Qtable->operator[](id_state);
 }
 

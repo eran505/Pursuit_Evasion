@@ -30,9 +30,10 @@ class RTDP{
     //std::shared_ptr<NodeG> root_evader_tree;
     ActionExpend action_expend;
     Evaluator evaluator;
-    DPGoalRec policer;
+    std::unique_ptr<Policer> policer;
+    int mode =0;
 public:
-    explicit RTDP(const StaticPolicy *evader,int seed,const std::vector<Point> &l_starts);
+    explicit RTDP(const StaticPolicy *evader,int seed,const std::vector<Point> &l_starts,int mode);
     Point get_action(const State<> &s);
     void reset_policy();
     agentEnum get_id(){return my_id;}
@@ -48,15 +49,20 @@ private:
 
 };
 
-RTDP::RTDP(const StaticPolicy *evader,int seed,const std::vector<Point> &l_starts):
+RTDP::RTDP(const StaticPolicy *evader,int seed,const std::vector<Point> &l_starts,int mode=0):
 
-    memo_rtdp(std::make_shared<MemoryRtdp>(seed,TrajectoriesTree(seed,evader->list_only_pos(),evader->get_copy_probabilities()))),
+    memo_rtdp(std::make_shared<MemoryRtdp>(seed,TrajectoriesTree(seed,evader->list_only_pos(),evader->get_copy_probabilities()),mode)),
     stack(),
     action_expend(evader),
     evaluator(memo_rtdp),
     start_point(l_starts.front()),
-    policer(seed,evader->list_only_pos(),evader->get_copy_probabilities())
-    {}
+    policer(nullptr), mode(mode)
+    {
+        if (this->mode==1)
+            policer = std::make_unique<DPGoalRec>(seed,evader->list_only_pos(),evader->get_copy_probabilities());
+        else policer = std::make_unique<Policer>();
+
+    }
 
 
 Point RTDP::get_action(const State<> &s) {
@@ -78,17 +84,24 @@ void RTDP::reset_policy() {
 
 void RTDP::update_state(State<> &s)
 {
-    policer.update_state(s);
+    policer->update_state(s);
     //cout<<s.to_string_state()<<endl;
 }
 
 Cell RTDP::bellman_update(State<> &&s ,const  Point &a){
-
-    //apply the action on the state
+#ifdef PRINT
+    cout<<" [pop] "<<s.to_string_state()<<endl;
+#endif
     do_SEQ(s,a);
-    //send for expend + eval
+#ifdef PRINT
+    cout<<"[update] "<<s.to_string_state()<<endl;
+#endif
+    if(this->mode==1) return this->evaluator.plan_rec_helper(s);
+
     auto seq_states = this->action_expend.expander_attacker(s);
-    Cell val = this->evaluator.eval_states(seq_states,s,policer);
+
+    Cell val = this->evaluator.eval_states(seq_states,s,policer.get());
+
     return val;
 
 }
@@ -96,7 +109,7 @@ Cell RTDP::bellman_update(State<> &&s ,const  Point &a){
 void RTDP::set_start_point(State<> &s) {
     s.set_speed(my_id,Point(0));
     s.set_position(my_id,Point(start_point));
-    policer.reset_state(s);
+    policer->reset_state(s);
 
 }
 

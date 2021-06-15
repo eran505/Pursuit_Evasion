@@ -21,20 +21,24 @@ class PRecAgent {
     int max_speed;
     string home;
     GoalRecognition GR;
-
+    std::vector<Point> start_p;
 public:
     agentEnum get_id(){return my_id;}
-    PRecAgent(int maxSpeedAgent, agentEnum agentId, string home1, int seed);
+    PRecAgent(int maxSpeedAgent, agentEnum agentId, string home1,int seed,const std::vector<Point>& l_start);
 
     Point get_action(State<> &s) ;
     ~PRecAgent() =default;
-
+    [[nodiscard]] int get_max_speed() const{return max_speed;}
     void reset_policy() ;
     void policy_data() const ;
     std::vector<double>* TransitionAction(const State<> *s) const ;
-
+    void set_start_point(State<> &s){
+        s.set_position(my_id,get_inital_place());
+        s.set_speed(my_id,Point(0));
+    };
+    void update_state(State<> &s){};
     void intial_args(const std::vector<std::vector<Point>> &pathz,vector<double> &&path_probabilties);
-
+    Point get_inital_place();
 };
 
 
@@ -43,9 +47,9 @@ void PRecAgent::intial_args(const vector<std::vector<Point>> &pathz, vector<doub
 
 }
 
-PRecAgent::PRecAgent(int maxSpeedAgent, agentEnum agentId, string home, int seed
+PRecAgent::PRecAgent(int maxSpeedAgent, agentEnum agentId, string home, int seed,const std::vector<Point>& l_start
 ):max_speed(maxSpeedAgent),my_id(agentId),home(std::move(home)), GR(seed) {
-
+    start_p=l_start;
 }
 
 Point PRecAgent::get_action(State<> &s){
@@ -58,6 +62,7 @@ Point PRecAgent::get_action(State<> &s){
 
 
 void PRecAgent::reset_policy() {
+    GR.set_my_location(get_inital_place());
     this->GR.reset_ptr();
 
 }
@@ -71,7 +76,9 @@ std::vector<double> *PRecAgent::TransitionAction(const State<> *s)const {
     return new std::vector<double>();
 }
 
-
+Point PRecAgent::get_inital_place() {
+    return start_p.front();
+}
 
 
 #endif //PE_AGENTGR_HPP
