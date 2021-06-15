@@ -65,7 +65,7 @@ public:
             ++i;
         }
         this->current_path=i;
-        this->current_path=2;
+        this->current_path=7;
         this->time_t=0;
         step_counter=0;
         this->memo[step_counter]=time_t;
