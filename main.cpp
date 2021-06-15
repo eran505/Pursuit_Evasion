@@ -35,8 +35,8 @@ int main() {
         //auto pursurer_agent = Initializer::init_GR(conf,evder_agent.get());
         auto pursurer_agent = Initializer::init_RTDP(conf,evder_agent.get());
         auto sim  = Emulator(pursurer_agent.get(),evder_agent.get(), std::move(s),conf);
-        sim.main_loop(200000);//2000000
-        break;
+        sim.main_loop(20000000);//2000000
+
     }
 
 

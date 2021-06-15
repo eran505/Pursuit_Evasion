@@ -140,8 +140,11 @@ int MemoryRtdp::to_closet_path_H(const State<> &s) {
 
 void MemoryRtdp::set_value_matrix(Entry entry, size_t second_entry, Cell val) {
     auto& vec = this->Qtable->at(entry);
+    //cout<<vec<<endl;
     auto old = vec[second_entry];
     //assert(old>=val);
+
+
     vec[second_entry]=val;
     //this->Qtable->operator[](entryState).operator[](action.hashMeAction(Point::actionMax))=val;
 

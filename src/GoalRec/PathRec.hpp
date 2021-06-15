@@ -78,11 +78,11 @@ public:
 void GoalRecognition::load_agent_paths(const std::vector<std::vector<Point>> &pathz,vector<double> &&path_probabilties) {
     probabilities = std::move(path_probabilties);
     all_pathz = pathz;
-    for(size_t i=0; i < pathz.size();++i)
-        GoalRecognition::add_path(pathz[i],u_int16_t(i),root.get());
+    for(size_t i=0; i < pathz.size();++i) {
 
+        GoalRecognition::add_path(pathz[i], u_int16_t(i), root.get());
+    }
     //printTree();
-
 }
 
 
@@ -92,6 +92,7 @@ void GoalRecognition::add_path(const std::vector<Point> &l_path,const u_int16_t 
     NodeG* node = cur_root;
     for (size_t i=0;i<l_path.size();++i)
     {
+
         if (auto res = search_node(node->child,l_path[i]); res == nullptr){
             auto& bPtr = node->child.emplace_back(std::make_unique<NodeG>(l_path[i],l_path.back(),id_path,probabilities[id_path]));
             node = bPtr.get();
@@ -334,9 +335,10 @@ std::vector<NodeG *> GoalRecognition::get_all_successors(NodeG *ptr, u_int32_t s
             results.push_back(cur);
             continue;
         }
+        --depth;
         for (auto & i : cur->child) {
             q.push(i.get());
-            q_depth.push(--depth);
+            q_depth.push(depth);
         }
     }
     return results;
