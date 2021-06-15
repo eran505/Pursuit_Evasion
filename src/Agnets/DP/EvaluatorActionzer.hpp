@@ -58,7 +58,7 @@ Cell Evaluator::evalute_state(const State<> &s, double transition_probability) {
         val+=this->memory_rtdp->get_max_val(s);
     res+=val*transition_probability;
 #ifdef PRINT
-    cout<<"[evalute_state] "<<s.to_string_state()<<"  vla="<<res<<endl;
+    cout<<"[evalute_state] "<<s.to_string_state()<<"  V="<<res<<endl;
 #endif
     return res;
 }
@@ -93,6 +93,7 @@ Cell Evaluator::plan_rec_helper(State<> &s) {
     auto list_successors = GoalRecognition::get_all_successors(s.budgets.ptr,s.jump);
     double sum_all=0.0;
     double expected_sum_reward=0.0;
+    double assert_num=0;
     int steps = s.jump;
     uint t = s.jump+s.state_time;
     for(auto& item:list_successors)
@@ -108,9 +109,11 @@ Cell Evaluator::plan_rec_helper(State<> &s) {
         s.set_position(this->e,i->pos);
         s.set_speed(this->e,Point(0));
         s.state_time=t;
+        set_jumps(s);
         expected_sum_reward+=evalute_state(s,sum_prob/sum_all);
+        assert_num+=sum_prob/sum_all;
     }
-
+    assert(assert_num>0.99);
     return expected_sum_reward*std::pow(R.discountF,steps);
 
 }

@@ -122,6 +122,8 @@ public:
     }
     void take_action_pursuer()
     {
+        //auto speed = s_state.get_speed(evader->get_id());
+        //s_state.set_speed(evader->get_id(),Point(0));
 
         pursuer->update_state(s_state);
         auto action_p = pursuer->get_action(s_state);
@@ -131,10 +133,13 @@ public:
 #endif
         s_state.applyAction(this->pursuer->get_id(),action_p,this->pursuer->get_max_speed(),s_state.jump);
 
+        //s_state.set_speed(evader->get_id(),speed);
+
     }
     void take_action_evader()
     {
         evader->make_action(s_state);
+
     }
     void set_jump()
     {

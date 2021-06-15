@@ -135,17 +135,18 @@ public:
     [[nodiscard]] u_int64_t getHashValueGR()const {
 
         //u_int64_t  seed = this->budgets[0];//+1000*this->budgets[0];
-        u_int64_t  seed = this->budgets.hash_it();
-        //seed =0;
-        seed ^= this->dataPoint[agentEnum::D*2+1].array[0] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
-        seed ^= this->dataPoint[agentEnum::D*2+1].array[1] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
-        seed ^= this->dataPoint[agentEnum::D*2+1].array[2] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
+        //u_int64_t  seed = this->budgets.hash_it();
+        u_int64_t seed =0;
 
         seed ^= this->dataPoint[agentEnum::D*2].array[0] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
         seed ^= this->dataPoint[agentEnum::D*2].array[1] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
         seed ^= this->dataPoint[agentEnum::D*2].array[2] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
 
-        seed ^= this->state_time + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
+        seed ^= this->dataPoint[agentEnum::D*2+1].array[0] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
+        seed ^= this->dataPoint[agentEnum::D*2+1].array[1] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
+        seed ^= this->dataPoint[agentEnum::D*2+1].array[2] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
+
+        seed ^= this->budgets.hash_it() + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
 
         return seed;
     }

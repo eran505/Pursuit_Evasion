@@ -17,6 +17,8 @@ int main() {
     CSVReader reader(csv_path,',');
     vector<vector<string>> rowsCsv = reader.getDataCSV();
 
+
+
     for (int i = 1; i < rowsCsv.size(); ++i) {
         srand(seed);
         auto conf = configGame(rowsCsv[i],seed);
@@ -33,9 +35,10 @@ int main() {
         //auto pursurer_agent = Initializer::init_GR(conf,evder_agent.get());
         auto pursurer_agent = Initializer::init_RTDP(conf,evder_agent.get());
         auto sim  = Emulator(pursurer_agent.get(),evder_agent.get(), std::move(s),conf);
-        sim.main_loop(2);//2000000
-
+        sim.main_loop(20000);//2000000
+        break;
     }
+
 
 
     return 0;
