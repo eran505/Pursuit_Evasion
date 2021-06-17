@@ -45,6 +45,8 @@ public:
 
     static NodeG* search_node(const vector<std::unique_ptr<NodeG>> &continer,const Point& p);
 
+    void add_path2(const std::vector<Point> &l_path, u_int16_t id_path, NodeG *cur_root);
+
     void printTree();
 
     [[nodiscard]] NodeG* get_curr_ptr()const{return curr_ptr;};
@@ -84,7 +86,6 @@ void GoalRecognition::load_agent_paths(const std::vector<std::vector<Point>> &pa
     }
     //printTree();
 }
-
 
 
 void GoalRecognition::add_path(const std::vector<Point> &l_path,const u_int16_t id_path,NodeG* cur_root) {

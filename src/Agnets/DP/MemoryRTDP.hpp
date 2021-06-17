@@ -134,7 +134,7 @@ void MemoryRtdp::heuristic(const State<>& s,Entry entry_index)
 
 int MemoryRtdp::to_closet_path_H(const State<> &s) {
     //return 0;
-    //return this->trajectories_tree.get_min_steps(s);
+    return this->trajectories_tree.get_min_steps(s);
     return this->trajectories_tree.get_min_steps();
 }
 

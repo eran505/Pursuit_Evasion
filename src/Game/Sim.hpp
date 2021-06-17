@@ -20,11 +20,17 @@ class Emulator{
 public:
 
     Emulator(P* p , E* e , State<> &&s,const configGame &conf)
-    :evader(e),pursuer(p),s_state(s),logger(conf)
-    {
-        jump_func=Jumper::get_jumps;
-        if(conf.eval_mode==-1)
-            jump_func = [](const Point&,const Point&){return 1;};
+    :evader(e),pursuer(p),s_state(s),logger(conf) {
+        jump_func = Jumper::get_jumps;
+
+        if (conf.eval_mode == -1){
+            jump_func = [](const Point &, const Point &) { return 1; };
+            cout<<"[options] disable"<<endl;
+        }
+        if(conf.alpha==1) {
+            jump_func = [](const Point &, const Point &) { return 1; };
+            cout<<"[options] disable"<<endl;
+        }
     }
 
     void game_sim()
@@ -58,6 +64,7 @@ public:
         auto s_start = State<>(s_state);
         for (int i = 0; i < num_of_games; ++i) {
             game_sim();
+            if (this->logger.get_done()) break;
         }
     }
     bool check_condition()
@@ -143,9 +150,7 @@ public:
     }
     void set_jump()
     {
-        auto jumping = jump_func(s_state.get_position_ref(evader->get_id()),s_state.get_position_ref(pursuer->get_id()));
-        //s_state.jump=1;
-        s_state.jump=jumping;
+        s_state.jump = jump_func(s_state.get_position_ref(evader->get_id()),s_state.get_position_ref(pursuer->get_id()));
     }
 
 

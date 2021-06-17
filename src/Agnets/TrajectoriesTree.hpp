@@ -29,10 +29,12 @@ public:
 
     u_int32_t get_min_steps(const State<> &s)
     {
+        //cout<<"[H] "<<s.to_string_state()<<endl;
         const Point& evader_position = s.get_position_ref(e);
         const Point& p_pos = s.get_position_ref(this->p);
         auto begin_look_up = s.state_time+s.jump;
         auto vec = dict_mapper_pathz.at(evader_position.expHash());
+        //cout<<vec<<endl;
         std::vector<u_int32_t> min_step;
         for (auto index_path: vec)
         {
@@ -54,13 +56,15 @@ private:
 
     u_int32_t get_min_step_diff(const Point& p_pos,size_t index_path, u_int start_look )
     {
-        u_int32_t min_step=10000000;
-        std::for_each(all_paths[index_path].begin()+start_look,all_paths[index_path].begin()+start_look+1,
-                      [&p_pos,&min_step](const Point& evader_pos){
-
-            auto res = Point::distance_min_step(p_pos,evader_pos);
+        u_int32_t min_step=1000000;
+        for (int i = start_look; i < all_paths[index_path].size() ; ++i) {
+//            assert(all_paths[index_path][i][0]<200 and all_paths[index_path][i][0]>-1 );
+//            assert(all_paths[index_path][i][1]<200 and all_paths[index_path][i][1]>-1 );
+//            assert(all_paths[index_path][i][2]<200 and all_paths[index_path][i][2]>-1 );
+            auto res = Point::distance_min_step(p_pos,all_paths[index_path][i]);
             if (min_step>res) min_step=res;
-        });
+        }
+
         return min_step;
     }
 

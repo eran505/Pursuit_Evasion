@@ -16,6 +16,7 @@ class Logger{
     std::string home;
     Saver<string> file_manger;
     u_int32_t log_every=1000;
+    bool done = false;
 public:
     enum info_val {ITER,COLL,GOAL,WALL};
     explicit Logger(const configGame& conf):info(4),history(4),home(conf.home),
@@ -24,6 +25,7 @@ public:
         file_manger.set_header_vec({"episodes","Collision","Wall" ,"Goal"});
     }
 
+    bool get_done()const{return done;};
 
 public:
     void log_scalar_increment(info_val val){
@@ -38,24 +40,31 @@ public:
         }
     }
 
-    void print()
+    const vector<u_int32_t>& get_log_vector()
     {
-
-        cout<<"\t Iter:"<<counter*log_every;
-        cout<<"\t Coll:"<<info[COLL];
-        cout<<"\t Goal:"<<info[GOAL];
-        cout<<"\t Wall:"<<info[WALL];
+        return info;
+    }
+    void print()const
+    {
+        cout<<"Iter:"<<info[ITER]*counter;
+        cout<<"\tColl:"<<info[COLL];
+        cout<<"\tGoal:"<<info[GOAL];
+        cout<<"\tWall:"<<info[WALL];
         cout<<endl;
     }
-
+    u_int32_t get_log_every()const{return log_every;}
 private:
     void flush()
     {
+        is_done();
         info[ITER]*=counter;
         file_manger.inset_data(info);
         file_manger.inset_endLine();
+        //if(info[COLL]==log_every) is_optimal = true;
         info.assign(info.size(),0);
+        //return is_optimal;
     }
+    void is_done(){done = info[COLL]==log_every;}
 };
 
 #endif //PE_LOGEER_H
