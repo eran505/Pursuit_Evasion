@@ -9,7 +9,7 @@
 #include "utils/logeer.h"
 #include "fileIO/processerCSV.hpp"
 #include "utils/Jumper.h"
-template< typename P=PRecAgent, typename E=StaticPolicy >
+template< typename P, typename E=StaticPolicy >
 class Emulator{
     E* evader;
     P* pursuer;
@@ -21,16 +21,15 @@ public:
 
     Emulator(P* p , E* e , State<> &&s,const configGame &conf)
     :evader(e),pursuer(p),s_state(s),logger(conf) {
-        jump_func = Jumper::get_jumps;
 
-        if (conf.eval_mode == -1){
+        if (conf.options == 0){
             jump_func = [](const Point &, const Point &) { return 1; };
             cout<<"[options] disable"<<endl;
         }
-        if(conf.alpha==1) {
-            jump_func = [](const Point &, const Point &) { return 1; };
-            cout<<"[options] disable"<<endl;
-        }
+        else if(conf.options==1) {
+            jump_func = Jumper::get_jumps;
+            cout<<"[options] enable"<<endl;
+        } else assert(false);
     }
 
     void game_sim()

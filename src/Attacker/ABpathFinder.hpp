@@ -57,7 +57,7 @@ public:
 
     ABfinder(u_int64_t seed, const Point &gridSize, int max_speed):
             randomizer_obj(seed),
-            GridSzie(gridSize),
+            GridSzie(gridSize),MAX_SPEED(max_speed),
             Astar_util_object(max_speed,Point(GridSzie))
     {}
 

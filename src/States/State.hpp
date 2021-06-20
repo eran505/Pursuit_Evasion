@@ -151,7 +151,25 @@ public:
         return seed;
     }
 
+    [[nodiscard]] u_int64_t getHashValueT()const {
 
+        //u_int64_t  seed = this->budgets[0];//+1000*this->budgets[0];
+        u_int64_t  seed = 0 ;
+        size_t i=0;
+        while(true)
+        {
+            seed ^= this->dataPoint[i].array[0] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
+            seed ^= this->dataPoint[i].array[1] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
+            seed ^= this->dataPoint[i].array[2] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
+            if(i++==3) break;
+
+        }
+        //seed ^= this->budgets.hash_it() + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
+        seed ^= this->state_time +  + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        seed ^=  this->dataPoint[2].accMulti(1) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+
+        return seed;
+    }
 
 
     [[nodiscard]] string to_string_state() const {

@@ -87,7 +87,7 @@ string getProjectDir()
     std::copy(res.begin(),res.end()-2,std::back_inserter(root_vec));
     return "/"+join(root_vec,"/");
 }
-string getRootDir()
+static string getRootDir()
 {
     auto res = splitStr(getExePath(),"/");
     std::vector<string> root_vec;
@@ -105,7 +105,7 @@ struct configGame{
     int maxA=2;
     u_int levelz=3;
 
-    std::chrono::duration<long,std::ratio<1,1>>::rep timeStart;
+    std::chrono::duration<long,std::ratio<1,1>>::rep timeStart{};
     int maxD=1;
     vector<Point> posDefender;
     vector<Point> gGoals ;
@@ -116,8 +116,10 @@ struct configGame{
     vector<Point> midPos;
     std::default_random_engine generator;
     std::uniform_int_distribution<int> distribution;
-    int alpha=10;
-    int eval_mode = 0;
+    int options=10;
+    int mode = 0;
+    int h=0;
+
 public:
     string home=getRootDir();
 
@@ -134,7 +136,7 @@ public:
         if(auto pos = dicoD.find('s');pos!=dicoD.end())
             this->_seed=std::stoi( pos->second );
         if(auto pos = dicoD.find('e');pos!=dicoD.end())
-            this->eval_mode=std::stoi( pos->second );
+            this->mode=std::stoi( pos->second );
     }
     configGame()= default;
 
@@ -156,9 +158,11 @@ public:
         if (!midVec.empty()) addMidPoint(midVec);
         config = "";
         if(row.size()>10)
-            eval_mode = stoi(row[11]);
+            mode = stoi(row[11]);
         if(row.size()>12)
-            alpha= stoi(row[12]);
+            options= stoi(row[12]);
+        if(row.size()>13)
+            h = stoi(row[13]);
         this->levelz=int(std::log2(this->sizeGrid.getMax()))+1;
         const auto s = std::chrono::system_clock::now();
         //std::chrono::duration<long,std::ratio<1,1>>::rep

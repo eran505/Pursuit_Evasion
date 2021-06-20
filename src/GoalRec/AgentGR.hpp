@@ -24,7 +24,7 @@ class PRecAgent {
     std::vector<Point> start_p;
 public:
     agentEnum get_id(){return my_id;}
-    PRecAgent(int maxSpeedAgent, agentEnum agentId, string home1,int seed,const std::vector<Point>& l_start);
+    PRecAgent(int A_max,int D_max, agentEnum agentId, string home1,int seed,const std::vector<Point>& l_start);
 
     Point get_action(State<> &s) ;
     ~PRecAgent() =default;
@@ -47,8 +47,8 @@ void PRecAgent::intial_args(const vector<std::vector<Point>> &pathz, vector<doub
 
 }
 
-PRecAgent::PRecAgent(int maxSpeedAgent, agentEnum agentId, string home, int seed,const std::vector<Point>& l_start
-):max_speed(maxSpeedAgent),my_id(agentId),home(std::move(home)), GR(seed) {
+PRecAgent::PRecAgent(int A_max,int D_max, agentEnum agentId, string home, int seed,const std::vector<Point>& l_start
+):max_speed(D_max),my_id(agentId),home(std::move(home)), GR(seed,A_max,D_max) {
     start_p=l_start;
 }
 

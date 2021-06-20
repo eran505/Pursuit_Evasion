@@ -18,21 +18,30 @@ class MemoryRtdp{
     std::unique_ptr<std::unordered_map<Entry,Row>> Qtable;
     std::vector<Point> id_to_point;
     std::function<u_int64_t (const State<> &s)> hash_func;
+    std::function<int (const State<> &s)> H;
     Randomizer rand;
     u_int32_t agent_max_speed = 1;
     agentEnum my_id = agentEnum::D;
     TrajectoriesTree trajectories_tree;
     std::unordered_map<u_int64_t,vector<string>> debug_map;
 public:
-    explicit MemoryRtdp(int seed,TrajectoriesTree &&_trajectories_tree,int mode):Qtable(std::make_unique<std::unordered_map<Entry ,Row>>()),
+    explicit MemoryRtdp(int seed,TrajectoriesTree &&_trajectories_tree,int mode,int option,int h):Qtable(std::make_unique<std::unordered_map<Entry ,Row>>()),
     id_to_point(Point::getVectorActionUniqie()),rand(seed),trajectories_tree(std::move(_trajectories_tree))
     {
-        if (mode == 0)
-            hash_func=[](const State<> &ptrS){return ptrS.getHashValue();};
-        else if(mode==1)
-            hash_func=[](const State<> &ptrS){return ptrS.getHashValueGR();};
-        else
-            hash_func=[](const State<> &ptrS){return ptrS.getHashValue();};
+
+        if (h==0) H = [](const State<> &ptrS) { return 0;};
+        if (h==1) H = [this](const State<> &ptrS) { return this->trajectories_tree.get_min_steps_all(ptrS);};
+        if (h==2) H = [this](const State<> &ptrS) { return this->trajectories_tree.get_min_steps(ptrS);};
+        if (h==3) H = [this](const State<> &ptrS) { return this->trajectories_tree.get_min_steps_all_end(ptrS);};
+        if (h==4) H = [this](const State<> &ptrS) { return this->trajectories_tree.get_min_steps_all_end_fst(ptrS);};
+
+
+        if (mode == 0) hash_func = [](const State<> &ptrS) { return ptrS.getHashValue();};
+        else if(mode==1) hash_func=[](const State<> &ptrS){return ptrS.getHashValueGR();};
+        else if(mode==2) hash_func=[](const State<> &ptrS){return ptrS.getHashValueT();};
+        else assert(false);
+
+
 
     }
     std::pair<Point,u_int64_t> get_argMAx(const State<> &s);
@@ -56,6 +65,7 @@ std::pair<Point, u_int64_t> MemoryRtdp::get_argMAx(const State<> &s) {
 }
 
 u_int64_t MemoryRtdp::get_entry(const State<> &s){
+    //return s.getHashValueGR();
     return this->hash_func(s);
 }
 inline bool MemoryRtdp::isInQ(Entry id_state)
@@ -133,9 +143,7 @@ void MemoryRtdp::heuristic(const State<>& s,Entry entry_index)
 }
 
 int MemoryRtdp::to_closet_path_H(const State<> &s) {
-    //return 0;
-    return this->trajectories_tree.get_min_steps(s);
-    return this->trajectories_tree.get_min_steps();
+    return H(s);
 }
 
 void MemoryRtdp::set_value_matrix(Entry entry, size_t second_entry, Cell val) {

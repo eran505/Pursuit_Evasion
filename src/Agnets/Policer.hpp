@@ -31,7 +31,7 @@ class DPGoalRec:public Policer{
     agentEnum p = agentEnum::D;
 public:
 
-    explicit DPGoalRec(int seed,const vector_paths& pathz, vector<double> &&prob_vec ):GR(seed){
+    explicit DPGoalRec(int seed,int max_a,int max_d,const vector_paths& pathz, vector<double> &&prob_vec ):GR(seed,max_a,max_d){
         GR.load_agent_paths(pathz,std::move(prob_vec));
     }
 

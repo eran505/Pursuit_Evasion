@@ -17,15 +17,14 @@ class TrajectoriesTree{
     agentEnum p=agentEnum::D;
     std::vector<std::vector<Point>> all_paths;
 public:
-    explicit TrajectoriesTree(int seed,const std::vector<std::vector<Point>> &pathz,
-        vector<double> &&path_probabilties):GR(seed){
+    explicit TrajectoriesTree(int seed,int max_a,int max_d,const std::vector<std::vector<Point>> &pathz,
+        vector<double> &&path_probabilties):GR(seed,max_a,max_d){
         GR.load_agent_paths(pathz,std::move(path_probabilties));
         dict_mapper_pathz=std::unordered_map<u_int64_t ,vector<int>>();
         dict_evader_paths(pathz);
         all_paths = pathz;
 
     }
-    u_int32_t get_min_steps(){return 0;}
 
     u_int32_t get_min_steps(const State<> &s)
     {
@@ -44,23 +43,60 @@ public:
         return *std::min_element(min_step.begin(),min_step.end());
     }
 
-     u_int64_t plan_rec_helper(State<> &s) {
 
+    u_int32_t get_min_steps_all(const State<> &s)
+    {
+        const Point& evader_position = s.get_position_ref(e);
+        const Point& p_pos = s.get_position_ref(this->p);
+        auto begin_look_up = s.state_time+s.jump;
 
+        std::vector<u_int32_t> min_step;
+        for (int index_path = 0; index_path < all_paths.size(); ++index_path) {
 
-
+            min_step.push_back(get_min_step_diff(p_pos,index_path,begin_look_up));
+        }
+        assert(!min_step.empty());
+        return *std::min_element(min_step.begin(),min_step.end());
     }
+
+    u_int32_t get_min_steps_all_end(const State<> &s)
+    {
+        const Point& evader_position = s.get_position_ref(e);
+        const Point& p_pos = s.get_position_ref(this->p);
+        auto begin_look_up = s.state_time+s.jump;
+
+        std::vector<u_int32_t> min_step;
+        for (int index_path = 0; index_path < all_paths.size(); ++index_path) {
+
+            min_step.push_back(get_min_step_diff_last_orgin(p_pos,index_path,begin_look_up));
+        }
+        assert(!min_step.empty());
+        return *std::min_element(min_step.begin(),min_step.end());
+    }
+
+    u_int32_t get_min_steps_all_end_fst(const State<> &s)
+    {
+        const Point& evader_position = s.get_position_ref(e);
+        const Point& p_pos = s.get_position_ref(this->p);
+        auto begin_look_up = s.state_time+s.jump;
+
+        std::vector<u_int32_t> min_step;
+        for (int index_path = 0; index_path < all_paths.size(); ++index_path) {
+
+            min_step.push_back(get_min_step_diff_last(p_pos,index_path,begin_look_up));
+        }
+        assert(!min_step.empty());
+        return *std::min_element(min_step.begin(),min_step.end());
+    }
+
 
 
 private:
 
-    u_int32_t get_min_step_diff(const Point& p_pos,size_t index_path, u_int start_look )
+    u_int32_t get_min_step_diff(const Point& p_pos,size_t index_path, u_int start_look)
     {
         u_int32_t min_step=1000000;
-        for (int i = start_look; i < all_paths[index_path].size() ; ++i) {
-//            assert(all_paths[index_path][i][0]<200 and all_paths[index_path][i][0]>-1 );
-//            assert(all_paths[index_path][i][1]<200 and all_paths[index_path][i][1]>-1 );
-//            assert(all_paths[index_path][i][2]<200 and all_paths[index_path][i][2]>-1 );
+        for (int i = start_look; i < start_look+1 ; ++i) {
             auto res = Point::distance_min_step(p_pos,all_paths[index_path][i]);
             if (min_step>res) min_step=res;
         }
@@ -83,6 +119,36 @@ private:
             }
         }
     }
+
+    u_int32_t get_min_step_diff_last(const Point& p_pos,size_t index_path, u_int start_look)
+    {
+        u_int32_t min_step=1000000;
+        u_int32_t last;
+        u_int32_t ctr=0;
+        int i;
+        auto end = all_paths[index_path].size();
+        for (i = start_look; i < end ; ++i) {
+            auto res = Point::distance_min_step(p_pos,all_paths[index_path][i]);
+            if (last<res) ctr++;
+            if (min_step>res) min_step=res;
+            last=res;
+            if(ctr>5) break;
+        }
+        return min_step+i;
+    }
+
+    u_int32_t get_min_step_diff_last_orgin(const Point& p_pos,size_t index_path, u_int start_look)
+    {
+        u_int32_t min_step=1000000;
+        int i;
+        auto end = all_paths[index_path].size();
+        for (i = start_look; i < end ; ++i) {
+            auto res = Point::distance_min_step(p_pos,all_paths[index_path][i]);
+            if (min_step>res) min_step=res;
+        }
+        return min_step;
+    }
+
 
 };
 

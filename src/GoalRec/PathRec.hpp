@@ -11,8 +11,8 @@
 
 
 #include "utils/game_util.hpp"
-#define MAX_SPEED_E 2
-#define MAX_SPEED_P 1
+//#define MAX_SPEED_E 2
+//#define MAX_SPEED_P 1
 #include "NodeGR.hpp"
 //#define VERBOSE
 
@@ -28,13 +28,17 @@ class GoalRecognition{
     std::default_random_engine rng;
     bool start_move=false;
     int found_path=-1;
-
+    int MAX_SPEED_E;
+    int MAX_SPEED_P;
 public:
 
-    explicit GoalRecognition(int _seed):root(std::make_unique<NodeG>()),my_loction(-1),rng(_seed)
+    explicit GoalRecognition(int _seed,int max_speedA,int max_speedD):root(std::make_unique<NodeG>()),my_loction(-1),rng(_seed)
     {
         cout<<root->pos.to_str()<<endl;
         curr_ptr=root.get();
+        MAX_SPEED_E=max_speedA;
+        MAX_SPEED_P = max_speedD;
+
     }
     NodeG* get_root(){return this->root.get(); ;}
     void set_my_location(const Point& p);

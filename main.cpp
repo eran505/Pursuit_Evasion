@@ -7,39 +7,66 @@
 #include "Game/Initializer.hpp"
 #include "Game/Sim.hpp"
 
+void game_start(configGame &conf);
+
 int main() {
 
+    u_int epideos_number = 10000000; //2000000
     int seed=3;
-    auto zero = Point(0);
     std::cout << "Hello, World!" << std::endl;
     std::string csv_path= getProjectDir() + "/csv/con16.csv";
     cout<<"csv_path: "<<csv_path<<endl;
     CSVReader reader(csv_path,',');
     vector<vector<string>> rowsCsv = reader.getDataCSV();
+    auto root_dir = getRootDir();
 
+    //log the con.csv file
+    Logger::copy_file(root_dir+LOG_DIR,csv_path);
 
+    std::vector<int> gr_id = {};
 
     for (int i = 1; i < rowsCsv.size(); ++i) {
         srand(seed);
         auto conf = configGame(rowsCsv[i],seed);
+        //conf.maxA=3;
+        // all the mode with -1 are GR naive agents
+        if (conf.mode<0) {gr_id.push_back(i);continue;}
 
         auto grid = Initializer::init_grid(conf.sizeGrid,conf.gGoals,conf.probGoals);
         State s;
         s.g_grid=grid.get();
         auto adata = Complex();
-        s.add_player_state(agentEnum::A,conf.posAttacker.front(),zero,adata);
+        s.add_player_state(agentEnum::A,conf.posAttacker.front(),Point(0),adata);
         s.add_player_state(agentEnum::D,conf.posDefender.front(),Point(0),adata);
         cout<<s.to_string_state()<<endl;
 
-        auto evder_agent = Initializer::init_attacker(conf);
-        //auto pursurer_agent = Initializer::init_GR(conf,evder_agent.get());
+        auto evder_agent = Initializer::init_attacker(conf, false );
         auto pursurer_agent = Initializer::init_RTDP(conf,evder_agent.get());
         auto sim  = Emulator(pursurer_agent.get(),evder_agent.get(), std::move(s),conf);
-        sim.main_loop(2000000);//2000000
+        sim.main_loop(epideos_number);
 
     }
 
-
+    for (int idx : gr_id) {
+        auto conf = configGame(rowsCsv[idx],seed);
+        game_start(conf);
+    }
 
     return 0;
+}
+
+void game_start(configGame &conf)
+{
+    auto grid = Initializer::init_grid(conf.sizeGrid,conf.gGoals,conf.probGoals);
+    State s;
+    s.g_grid=grid.get();
+    auto adata = Complex();
+    s.add_player_state(agentEnum::A,conf.posAttacker.front(),Point(0),adata);
+    s.add_player_state(agentEnum::D,conf.posDefender.front(),Point(0),adata);
+    cout<<s.to_string_state()<<endl;
+
+    auto evder_agent = Initializer::init_attacker(conf, true);
+    auto pursurer_agent = Initializer::init_GR(conf,evder_agent.get());
+    auto sim  = Emulator(pursurer_agent.get(),evder_agent.get(), std::move(s),conf);
+    sim.main_loop(8000);//2000000
 }

@@ -33,7 +33,7 @@ class RTDP{
     std::unique_ptr<Policer> policer;
     int mode =0;
 public:
-    explicit RTDP(const StaticPolicy *evader,int seed,const std::vector<Point> &l_starts,int mode);
+    explicit RTDP(const StaticPolicy *evader,const configGame& conf);
     Point get_action(const State<> &s);
     void reset_policy();
     agentEnum get_id(){return my_id;}
@@ -49,17 +49,17 @@ private:
 
 };
 
-RTDP::RTDP(const StaticPolicy *evader,int seed,const std::vector<Point> &l_starts,int mode=0):
+RTDP::RTDP(const StaticPolicy *evader,const configGame& conf):
 
-    memo_rtdp(std::make_shared<MemoryRtdp>(seed,TrajectoriesTree(seed,evader->list_only_pos(),evader->get_copy_probabilities()),mode)),
+    memo_rtdp(std::make_shared<MemoryRtdp>(conf._seed,TrajectoriesTree(conf._seed,conf.maxA,conf.maxD,evader->list_only_pos(),evader->get_copy_probabilities()), conf.mode,conf.options,conf.h)),
     stack(),
     action_expend(evader),
     evaluator(memo_rtdp),
-    start_point(l_starts.front()),
-    policer(nullptr), mode(mode)
+    start_point(conf.posDefender.front()),
+    policer(nullptr), mode(conf.mode)
     {
         if (this->mode==1)
-            policer = std::make_unique<DPGoalRec>(seed,evader->list_only_pos(),evader->get_copy_probabilities());
+            policer = std::make_unique<DPGoalRec>(conf._seed,conf.maxA,conf.maxD,evader->list_only_pos(),evader->get_copy_probabilities());
         else policer = std::make_unique<Policer>();
 
     }
