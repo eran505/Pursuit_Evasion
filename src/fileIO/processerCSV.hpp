@@ -119,7 +119,7 @@ struct configGame{
     int options=10;
     int mode = 0;
     int h=0;
-
+    int a=1;
 public:
     string home=getRootDir();
 
@@ -163,6 +163,8 @@ public:
             options= stoi(row[12]);
         if(row.size()>13)
             h = stoi(row[13]);
+        if(row.size()>14)
+            a = stoi(row[14]);
         this->levelz=int(std::log2(this->sizeGrid.getMax()))+1;
         const auto s = std::chrono::system_clock::now();
         //std::chrono::duration<long,std::ratio<1,1>>::rep

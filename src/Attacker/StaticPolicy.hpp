@@ -23,7 +23,6 @@ class StaticPolicy{
     PathGenartor gen;
     std::unique_ptr<PathMapper<u_int32_t>>  mapper= nullptr;
     string home;
-    unordered_map<int,Point*>* hashActionMap{};
     agentEnum my_id;
     Randomizer randomizer;
     int max_speed;
@@ -35,11 +34,22 @@ public:
     {
         home = std::move(home_path);
         my_id=id;
-        hashActionMap= Point::getDictAction();
         auto [list_pathz,probablity_list] = gen.geneate_path_loopV2(goals_points,starting_points,num_of_paths);
         make_mapper(list_pathz,probablity_list);
         save_data = save;
     }
+
+    void set_mapper(std::unique_ptr<PathMapper<u_int32_t>> mapper_ptr)
+    {
+        this->mapper=std::move(mapper_ptr);
+    }
+
+    std::unique_ptr<PathMapper<u_int32_t>> get_mapper()
+    {
+        return std::move(mapper);
+    }
+
+
     agentEnum get_id(){return my_id;}
     u_int32_t get_max_len_path(){return mapper->get_max_path_size();}
 

@@ -6,6 +6,8 @@
 #include "States/Data/StateData.hpp"
 #include "Game/Initializer.hpp"
 #include "Game/Sim.hpp"
+#include "Agnets/PathDecomposition/PathDecomposit.hpp"
+#include <chrono>
 
 void game_start(configGame &conf);
 
@@ -40,11 +42,21 @@ int main() {
         s.add_player_state(agentEnum::D,conf.posDefender.front(),Point(0),adata);
         cout<<s.to_string_state()<<endl;
 
-        auto evder_agent = Initializer::init_attacker(conf, false );
+        auto evder_agent = Initializer::init_attacker(conf, true );
         auto pursurer_agent = Initializer::init_RTDP(conf,evder_agent.get());
-        auto sim  = Emulator(pursurer_agent.get(),evder_agent.get(), std::move(s),conf);
-        sim.main_loop(epideos_number);
 
+
+        PathDecomposit dec = PathDecomposit(evder_agent.get(),conf,s);
+
+        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+        dec.train();
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
+        std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
+        std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::nanoseconds> (end - begin).count() << "[ns]" << std::endl;
+        std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "[s]" << std::endl;
+
+        break;
     }
 
     for (int idx : gr_id) {

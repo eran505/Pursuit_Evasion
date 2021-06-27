@@ -42,6 +42,11 @@ public:
     void update(const Point& a, State<>&& s,Entry id);
     [[nodiscard]] int get_max_speed() const{return max_speed;}
     void update_state(State<> &s);
+
+    void set_Q_table(std::unique_ptr<Table>&& t){this->memo_rtdp->set_Q_table(std::move(t));}
+
+    std::unique_ptr<Table> get_Q_tabel(){ return this->memo_rtdp->get_Q_table();}
+    std::unordered_map<u_int64_t,State<>> get_map_state(){ return std::move(this->memo_rtdp->get_map_state());}
 private:
     Cell bellman_update(State<> &&s , const Point &a);
     void do_SEQ(State<> &s, const Point &a);
@@ -51,7 +56,7 @@ private:
 
 RTDP::RTDP(const StaticPolicy *evader,const configGame& conf):
 
-    memo_rtdp(std::make_shared<MemoryRtdp>(conf._seed,TrajectoriesTree(conf._seed,conf.maxA,conf.maxD,evader->list_only_pos(),evader->get_copy_probabilities()), conf.mode,conf.options,conf.h)),
+    memo_rtdp(std::make_shared<MemoryRtdp>(conf._seed,evader->list_only_pos(), conf.mode,conf.options,conf.h,conf.maxA)),
     stack(),
     action_expend(evader),
     evaluator(memo_rtdp),

@@ -49,7 +49,6 @@ public:
 
     static NodeG* search_node(const vector<std::unique_ptr<NodeG>> &continer,const Point& p);
 
-    void add_path2(const std::vector<Point> &l_path, u_int16_t id_path, NodeG *cur_root);
 
     void printTree();
 

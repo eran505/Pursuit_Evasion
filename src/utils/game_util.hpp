@@ -499,6 +499,7 @@ public:
     int range_random(int min, int max); //range : [min, max)
     vector<double> getTopK(int k, vector<double> &vec);
 
+
     template< typename V>
     size_t get_max_index_random(std::vector<V> list_vec,std::default_random_engine &rng)
     {

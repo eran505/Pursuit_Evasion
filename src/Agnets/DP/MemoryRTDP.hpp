@@ -8,52 +8,52 @@
 #include "States/State.hpp"
 #include "Rewards.hpp"
 #include "../TrajectoriesTree.hpp"
+#include "Heuristicer.hpp"
 
 typedef float Cell;
 typedef std::vector<Cell> Row;
 typedef u_int64_t Entry;
+typedef std::unordered_map<Entry ,Row> Table;
 class MemoryRtdp{
 
-    Rewards R = Rewards::getRewards();
+    //Rewards R = Rewards::getRewards();
     std::unique_ptr<std::unordered_map<Entry,Row>> Qtable;
     std::vector<Point> id_to_point;
     std::function<u_int64_t (const State<> &s)> hash_func;
-    std::function<int (const State<> &s)> H;
     Randomizer rand;
-    u_int32_t agent_max_speed = 1;
-    agentEnum my_id = agentEnum::D;
-    TrajectoriesTree trajectories_tree;
-    std::unordered_map<u_int64_t,vector<string>> debug_map;
+    std::unordered_map<u_int64_t,State<>> debug_map;
+    Heuristicer heuristicer;
+
+
 public:
-    explicit MemoryRtdp(int seed,TrajectoriesTree &&_trajectories_tree,int mode,int option,int h):Qtable(std::make_unique<std::unordered_map<Entry ,Row>>()),
-    id_to_point(Point::getVectorActionUniqie()),rand(seed),trajectories_tree(std::move(_trajectories_tree))
+    explicit MemoryRtdp(int seed,vector<vector<Point>> &&pathz_all,int mode,int option,int h,int max_speed):Qtable(std::make_unique<std::unordered_map<Entry ,Row>>()),
+    id_to_point(Point::getVectorActionUniqie()),rand(seed),heuristicer(max_speed,h,pathz_all){
+        init_object(mode,h);
+    }
+
+    MemoryRtdp(int seed,vector<vector<Point>> &&pathz_all,int mode,int option,int h,std::unique_ptr<Table> ptr_Q,int max_speed):Qtable(std::move(ptr_Q)),
+    id_to_point(Point::getVectorActionUniqie()),rand(seed),heuristicer(max_speed,h,pathz_all){
+        init_object(mode,h);
+    }
+    void init_object(int mode,int h)
     {
-
-        if (h==0) H = [](const State<> &ptrS) { return 0;};
-        if (h==1) H = [this](const State<> &ptrS) { return this->trajectories_tree.get_min_steps_all(ptrS);};
-        if (h==2) H = [this](const State<> &ptrS) { return this->trajectories_tree.get_min_steps(ptrS);};
-        if (h==3) H = [this](const State<> &ptrS) { return this->trajectories_tree.get_min_steps_all_end(ptrS);};
-        if (h==4) H = [this](const State<> &ptrS) { return this->trajectories_tree.get_min_steps_all_end_fst(ptrS);};
-
 
         if (mode == 0) hash_func = [](const State<> &ptrS) { return ptrS.getHashValue();};
         else if(mode==1) hash_func=[](const State<> &ptrS){return ptrS.getHashValueGR();};
         else if(mode==2) hash_func=[](const State<> &ptrS){return ptrS.getHashValueT();};
         else assert(false);
-
-
-
     }
+    std::unordered_map<u_int64_t,State<>> get_map_state(){return std::move(debug_map);}
     std::pair<Point,u_int64_t> get_argMAx(const State<> &s);
     u_int64_t get_entry(const State<> &s);
     void Q_table_add_row(const State<> &s,Entry key_entry);
-    int to_closet_path_H(const State<> &s);
-    void heuristic(const State<> &s, Entry entry_index);
     void set_value_matrix(Entry entry, size_t second_entry, Cell val);
 
     bool isInQ(Entry id_state);
     Cell get_max_val(const State<> &s);
     const Row &get_row_qTable(const State<> &s, Entry id_state);
+    void set_Q_table(std::unique_ptr<Table> && t){this->Qtable=std::move(t);}
+    std::unique_ptr<Table> get_Q_table();
 };
 
 std::pair<Point, u_int64_t> MemoryRtdp::get_argMAx(const State<> &s) {
@@ -81,70 +81,29 @@ const Row& MemoryRtdp::get_row_qTable(const State<> &s,Entry id_state)
     if(!isInQ(id_state)){
         Q_table_add_row(s,id_state);
     }
-//    if (auto pos = debug_map.find(id_state);pos==debug_map.end()){
-//        auto x=debug_map.try_emplace(id_state);
-//        x.first->second={s.to_str_gr()};
-//    }else{
-//        if(pos->second.front() != s.to_str_gr())
-//        {
-//            cout<<"\t\told:"<<pos->second.front()<<"\n\t\tnew:"<<s.to_str_gr()<<"\n"<<endl;
-//            assert(false);
-//        }
-//    }
 
     return Qtable->operator[](id_state);
 }
 
 void MemoryRtdp::Q_table_add_row(const State<> &s,Entry key_entry) {
 
-    Qtable->try_emplace(key_entry,27,1);
-    heuristic(s,key_entry);
+    Qtable->try_emplace(key_entry,heuristicer.heuristic(s));
+    //Qtable->try_emplace(key_entry,27,1);
+    //heuristic(s,key_entry);
+    debug_map.try_emplace(key_entry,s);
+
 
 }
 
-//
-// Created by eranhe on 6/13/21.
-//
-
-#ifndef PE_HEURISTIC_HPP
-#define PE_HEURISTIC_HPP
 
 
+std::unique_ptr<Table> MemoryRtdp::get_Q_table(){
 
-void MemoryRtdp::heuristic(const State<>& s,Entry entry_index)
-{
-
-    vector<State<>> vec_q;
-    auto oldState = State(s);
-
-    size_t ctr=-1;
-    for (const auto &item_action : this->id_to_point)
-    {
-        ctr++;
-        // apply action state and let the envirmont to roll and check the reward/pos
-        Point actionCur = item_action;
-
-        double val;
-        bool isWall = oldState.applyAction(my_id,actionCur,agent_max_speed,oldState.jump);
-
-        int step = to_closet_path_H(oldState);
-
-
-        if (isWall)
-            val = (this->R.WallReward)*std::pow(R.discountF,oldState.jump);
-        else
-            val=(this->R.CollReward)*std::pow(R.discountF,step);
-
-        oldState.assignment(s,this->my_id);
-        // insert to Q table
-        this->set_value_matrix(entry_index,item_action.hashMeAction(Point::actionMax) ,val);
-    }
+    return std::move(this->Qtable);
 
 }
 
-int MemoryRtdp::to_closet_path_H(const State<> &s) {
-    return H(s);
-}
+
 
 void MemoryRtdp::set_value_matrix(Entry entry, size_t second_entry, Cell val) {
     auto& vec = this->Qtable->at(entry);
@@ -162,6 +121,9 @@ Cell MemoryRtdp::get_max_val(const State<> &s){
     auto r = this->get_row_qTable(s,this->get_entry(s));
     return *std::max_element(r.begin(),r.end());
 }
+
+#ifndef PE_HEURISTIC_HPP
+#define PE_HEURISTIC_HPP
 
 #endif //PE_HEURISTIC_HPP
 

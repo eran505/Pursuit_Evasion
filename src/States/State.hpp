@@ -279,6 +279,27 @@ public:
 
     }
 
+    [[nodiscard]] string mini_str() const {
+        string sep="_";
+        string str;
+        //str.append(std::to_string(this->time_t)+"_");
+        int agent_sizes = this->dataPoint.size()/2;
+        for(int j =0;j<agent_sizes;++j){
+            auto my_pos = this->dataPoint[j*2];
+            auto my_speed =  this->dataPoint[j*2+1];
+
+            str.append(sep);
+            str.append(my_pos.to_str());
+            str.append(sep);
+        }
+        str.append(sep);
+
+        str.append(this->budgets.to_string());
+        str.append(std::to_string(this->state_time));
+        return str;
+
+    }
+
 };
 
 
