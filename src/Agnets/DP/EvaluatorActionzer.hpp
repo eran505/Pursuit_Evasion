@@ -28,8 +28,9 @@ public:
 
     void set_jumps(State<> &s);
 
-    Cell plan_rec_helper(State<> &s);
 
+    Cell plan_rec_helper(State<> &s);
+    static  vector<vector<NodeG*>> NodeG_to_vectors(std::vector<NodeG*> l);
 };
 
 
@@ -46,7 +47,7 @@ Cell Evaluator::eval_states(vector<tuple<StatePoint, int, double>> &arr,State<> 
         s.state_time=time_next; // fix the time step
         assert(std::get<1>(itemL)==time_next);
         set_jumps(s); // set the jumps
-        policer->search(s);
+        policer->search_state(s);
         expected_sum_reward+=evalute_state(s,std::get<2>(itemL));
     }
     return expected_sum_reward*std::pow(R.discountF,steps);
@@ -91,22 +92,30 @@ void Evaluator::set_jumps(State<>& s)
 
 Cell Evaluator::plan_rec_helper(State<> &s) {
     auto list_successors = GoalRecognition::get_all_successors(s.budgets.ptr,s.jump);
+    auto list_of_list_successors = NodeG_to_vectors(list_successors);
     double sum_all=0.0;
     double expected_sum_reward=0.0;
     double assert_num=0;
     int steps = s.jump;
     uint t = s.jump+s.state_time;
-    for(auto& item:list_successors)
+    for(auto& item:list_of_list_successors)
     {
-        sum_all=std::accumulate(item->goal_likelihood.begin(), item->goal_likelihood.end(),
-                                       sum_all);
+
+        std::for_each(item.begin(),item.end(),[&sum_all](const NodeG *x){
+            sum_all=std::accumulate(x->goal_likelihood.begin(), x->goal_likelihood.end(),
+                                    sum_all);
+        });
+
     }
 
-    for(NodeG* i: list_successors)
+    for(auto& i: list_of_list_successors)
     {
-        double sum_prob = std::accumulate(i->goal_likelihood.begin(),i->goal_likelihood.end(),0.0);
+        double sum_prob = 0.0;
+        std::for_each(i.begin(),i.end(),[&sum_prob](const NodeG *x){
+            sum_prob=std::accumulate(x->goal_likelihood.begin(), x->goal_likelihood.end(),sum_prob);
+        });
         s.budgets=i;
-        s.set_position(this->e,i->pos);
+        s.set_position(this->e,i.front()->pos);
         s.set_speed(this->e,Point(0));
         s.state_time=t;
         set_jumps(s);
@@ -118,5 +127,23 @@ Cell Evaluator::plan_rec_helper(State<> &s) {
 
 }
 
+vector<vector<NodeG*>> Evaluator::NodeG_to_vectors(std::vector<NodeG*> l)
+{
+    vector<vector<NodeG*>> results;
+    for(int i=0;i<l.size();i++)
+    {
+        std::vector<NodeG*> item;
+        item.push_back(l[i]);
+        for (int j = i+1; j < l.size(); ++j) {
+            if(l[i]->pos==l[j]->pos) {
+                item.push_back(l[j]);
+            }
+        }
+        results.push_back(std::move(item));
+    }
+    return results;
+
+
+}
 
 #endif //PE_EVALUATORACTIONZER_HPP

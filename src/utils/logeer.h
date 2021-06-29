@@ -12,6 +12,14 @@
 #include "fileIO/processerCSV.hpp"
 
 namespace fs = std::filesystem;
+int writeFile (const std::string& input,const string& home);
+int writeFile (const std::string& input,const string& home)
+{
+    std::ofstream out(home+LOG_DIR"time.txt");
+    out << input;
+    out.close();
+    return 0;
+}
 
 class Logger{
     std::vector<u_int32_t> info;
@@ -24,11 +32,15 @@ class Logger{
 public:
     enum info_val {ITER,COLL,GOAL,WALL};
     explicit Logger(const configGame& conf):info(4),home(conf.home),
-    file_manger(conf.home+LOG_DIR+"S"+std::to_string(conf._seed)+"_I"+conf.idNumber+"_M"+std::to_string(conf.mode)+"_O"+std::to_string(conf.options)+"_H"+std::to_string(conf.h)+"_Eval.csv",10)
+    file_manger(conf.home+LOG_DIR+"S"+std::to_string(conf._seed)+"_I"+conf.idNumber+"_M"+std::to_string(conf.mode)+"_O"+std::to_string(conf.options)+"_H"+std::to_string(conf.h)+"_A"+std::to_string(conf.a)+"_Eval.csv",10)
     {
         file_manger.set_header_vec({"episodes","Collision","Wall" ,"Goal"});
     }
-
+    explicit Logger(const string& home,const string& file_name):info(4),home(home),
+                                            file_manger(home+LOG_DIR+"S"+file_name+".csv",10)
+    {
+        file_manger.set_header_vec({"ID","Time"});
+    }
     bool get_done()const{return done;};
 
 public:
@@ -41,7 +53,11 @@ public:
             flush();
         }
     }
-
+    void log_string_row(vector<string>&& data_row)
+    {
+        file_manger.inset_data(data_row);
+        file_manger.inset_endLine();
+    }
     const vector<u_int32_t>& get_log_vector()
     {
         return info;
@@ -86,5 +102,7 @@ private:
     }
     void is_done(){done = info[COLL]==log_every;}
 };
+
+
 
 #endif //PE_LOGEER_H

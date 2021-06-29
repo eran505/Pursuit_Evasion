@@ -124,6 +124,7 @@ void RTDP::empty_stack() {
 #ifdef PRINT
     stack.print_stak();
 #endif
+    //this->stack.pop();
     while(!this->stack.is_empty()) {
         auto& item = this->stack.pop();
         //this->evaluator->change_scope_(&item.state);

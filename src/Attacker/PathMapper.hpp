@@ -65,6 +65,7 @@ public:
             ++i;
         }
         this->current_path=i;
+        //this->current_path=22;
         this->time_t=0;
         step_counter=0;
         this->memo[step_counter]=time_t;
@@ -159,10 +160,12 @@ private:
         }
         char sep=';';
         auto iter = probabilities.begin();
+        int p_num=0;
         for(const auto& item:all_paths) {
-            cout<<*(iter++)<<sep;
+            cout<<p_num++<<": "<<*(iter++)<<": "<<sep;
+            int ctr_time=0;
             for (const auto & i : item) {
-                cout << i << sep;
+                cout <<ctr_time++<<":"<< i << sep;
             }
             cout<<"\n"<<endl;
         }

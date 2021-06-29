@@ -56,7 +56,7 @@ void PathDecomposit::update_evader_paths(std::vector<EvaderPath>&& pathsz,vector
 
 void PathDecomposit::train()
 {
-    if(conf.a==1)
+    if(conf.a==0)
         all_train();
     else
         single_train();
@@ -66,7 +66,7 @@ void PathDecomposit::all_train()
 {
     std::unique_ptr<RTDP> pursurer_agent = decompos_paths();
     auto sim  = Emulator(pursurer_agent.get(),evader, std::move(State<>(s_state)),conf);
-    sim.main_loop(2000000);
+    sim.main_loop(40000000); //40000000
 
 }
 
@@ -76,13 +76,14 @@ void PathDecomposit::single_train()
 
     auto all_paths_ = evader->get_copy_pathz();
     auto prob_all_paths_  = evader->get_copy_probabilities();
-
+    int i=0;
     for(auto & p_path : all_paths)
     {
+
         update_evader_paths({p_path},{1.0});
         std::unique_ptr<RTDP> pursurer_agent = decompos_paths();
         auto sim  = Emulator(pursurer_agent.get(),evader, std::move(State<>(s_state)),conf);
-        sim.main_loop(20000);
+        sim.main_loop(50000); //50000
         std::unique_ptr<Table> Q = pursurer_agent->get_Q_tabel();
         cout<<"Q:"<<Q->size()<<endl;
         l_Q_table.push_back(std::move(Q));
@@ -100,7 +101,7 @@ void PathDecomposit::single_train()
     std::unique_ptr<RTDP> pursurer_agent = decompos_paths();
     pursurer_agent->set_Q_table(std::move(big));
     auto sim  = Emulator(pursurer_agent.get(),evader, std::move(State<>(s_state)),conf);
-    sim.main_loop(2000000);
+    sim.main_loop(40000000);
 }
 
 

@@ -21,7 +21,9 @@ namespace Jumper {
 
     static int get_jumps(const Point &e, const Point &p) {
         //return 1;
-        return Jumper::get_step_number(Jumper::get_dif(e, p).getMax());
+        auto x = Jumper::get_step_number(Jumper::get_dif(e, p).getMax());
+        //x = std::max(int(x/2),1);
+        return x;
     }
 }
 #endif //PE_JUMPER_H

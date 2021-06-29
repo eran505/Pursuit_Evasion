@@ -30,7 +30,10 @@ class GoalRecognition{
     int found_path=-1;
     int MAX_SPEED_E;
     int MAX_SPEED_P;
+    vector<NodeG*> l_cur;
 public:
+
+
 
     explicit GoalRecognition(int _seed,int max_speedA,int max_speedD):root(std::make_unique<NodeG>()),my_loction(-1),rng(_seed)
     {
@@ -49,6 +52,7 @@ public:
 
     static NodeG* search_node(const vector<std::unique_ptr<NodeG>> &continer,const Point& p);
 
+    std::vector<NodeG*> get_list_cur(){return l_cur;};
 
     void printTree();
 
@@ -61,9 +65,10 @@ public:
         start_move=false;
         this->found_path=-1;
         set_my_location(my_loction);
+        l_cur.push_back(curr_ptr);
     }
     Point get_my_loc(){return this->my_loction;}
-    void search_tree(const Point &p, NodeG* ptr);
+    void search_tree(const Point &p, NodeG* ptr,int d);
     bool is_stay_inplace(const Point &evader);
     size_t make_decsion(const Point &evader);
     template< typename C>
@@ -75,8 +80,13 @@ public:
 
     Point do_action(const Point &evader,const Point &my_speed );
 
-    void advance_curr_ptr(const Point &p);
+    void advance_curr_ptr(const Point &p,int d);
     static std::vector<NodeG*> get_all_successors(NodeG* ptr,u_int32_t steps);
+
+
+    void search_tree_with_jumps(const Point &p, int d, const vector<NodeG *> &list_nodes);
+
+    static vector<NodeG *> get_all_successors(const vector<NodeG *> &ptr, u_int32_t steps);
 };
 
 
@@ -87,7 +97,7 @@ void GoalRecognition::load_agent_paths(const std::vector<std::vector<Point>> &pa
 
         GoalRecognition::add_path(pathz[i], u_int16_t(i), root.get());
     }
-    //printTree();
+   // printTree();
 }
 
 
@@ -167,28 +177,49 @@ void GoalRecognition::printTree()
     cout<<_level<<endl;
 }
 
-void GoalRecognition::search_tree(const Point &p, NodeG* ptr) {
-    if(ptr->pos==p) {
-        curr_ptr = ptr;
+void GoalRecognition::search_tree(const Point &p, NodeG* ptr,int d) {
+    //cout<<"d:"<<d<<"\t"<<ptr->pos.to_str()<<endl;
+    if(d==0 or ptr->child.empty()) {
+
+        if(ptr->pos==p){
+            curr_ptr = ptr;
+            //cout<<" [y] ";
+        }
         return;
     }
     for (const auto& ele : ptr->child)
     {
-        search_tree(p,ele.get());
+        search_tree(p,ele.get(),d-1);
     }
 
 }
 
-void GoalRecognition::advance_curr_ptr(const Point &p)
+void GoalRecognition::advance_curr_ptr(const Point &p,int d)
 {
-    this->search_tree(p,curr_ptr);
+    //this->search_tree(p,curr_ptr,d);
+    this->search_tree_with_jumps(p,d,l_cur);
+}
+
+
+void GoalRecognition::search_tree_with_jumps(const Point &p,int d,const std::vector<NodeG*> &list_nodes)
+{
+    std::vector<NodeG*> l;
+    for (auto& item : list_nodes) {
+        auto res = GoalRecognition::get_all_successors(item, d);
+        std::copy_if(res.begin(),res.end(),std::back_inserter(l),[&p](const NodeG* n){
+            if (n->pos==p) return true;
+            return false;
+        });
+    }
+    this->l_cur=l;
+    cout<<"";
+
 }
 
 
 
-
 size_t GoalRecognition::make_decsion(const Point &evader ) {
-    this->search_tree(evader,curr_ptr);
+    this->search_tree(evader,curr_ptr,1);
     //assert(evader==curr_ptr->pos);
 
     vector<u_int32_t > most_likely_paths;
@@ -265,7 +296,9 @@ u_int32_t GoalRecognition::get_the_most_likely_path(std::vector<C> idx_list) {
 }
 
 bool GoalRecognition::is_stay_inplace(const Point &evader) {
-    this->search_tree(evader,curr_ptr);
+
+    this->search_tree(evader,curr_ptr,1);
+    //cout<<"E:"<<evader.to_str()<<"\tP:"<<curr_ptr->pos.to_str()<<endl;
     size_t min_step = curr_ptr->min_step;
     assert(evader==curr_ptr->pos);
     std::vector<size_t> relevent_pathz;
@@ -287,7 +320,6 @@ bool GoalRecognition::is_stay_inplace(const Point &evader) {
 }
 
 Point GoalRecognition::do_action(const Point &evader,const Point &my_speed) {
-    //cout<<evader.to_str()<<endl;
     if (!start_move){
         if (is_stay_inplace(evader))
             return Point(0);
@@ -322,6 +354,21 @@ Point GoalRecognition::do_action(const Point &evader,const Point &my_speed) {
 //NodeG *GoalRecognition::fast_search(u_int64_t id_hash) const {
 //    return this->node_dict->at(id_hash);
 //}
+
+std::vector<NodeG *> GoalRecognition::get_all_successors(const std::vector<NodeG*> &ptr, u_int32_t steps) {
+    auto results = std::vector<NodeG *>();
+    for(auto i : ptr) {
+        auto l = get_all_successors(i, steps);
+        if(results.empty()) results=l;
+        else{
+            for(auto& item :l)
+                if(auto pos = std::find_if(results.begin(),results.end(),[&item](const NodeG* rc)->bool{
+                        return rc->hash_it()==item->hash_it();}); pos==results.end())
+                    results.push_back(item);
+        }
+    }
+    return results;
+}
 
 std::vector<NodeG *> GoalRecognition::get_all_successors(NodeG *ptr, u_int32_t steps) {
     auto results = std::vector<NodeG *>();

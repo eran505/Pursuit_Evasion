@@ -43,10 +43,13 @@ public:
         while(true)
         {
             set_jump();
-
+#ifdef PRINT
+            std::cout<<"run: "<<episodes<<"\t[state] "<<s_state.to_string_state()<<"\t";
+#endif
             take_action_pursuer();
-
             take_action_evader();
+
+
 
             s_state.state_time+=s_state.jump;
 
@@ -72,11 +75,12 @@ public:
         const Point& pos_E = this->s_state.get_position(this->evader->get_id());
         const Point& pos_P = this->s_state.get_position(this->pursuer->get_id());
         //wall
+
         if(is_absolut_wall(pos_P))
         {
             #ifdef PRINT
-            cout<<"[event] WallId => ";
-            cout<<"[real] "<<s_state.to_string_state()<<endl;
+            std::cout<<"run: "<<episodes<<"\t[state] "<<s_state.to_string_state()<<"\t";
+            cout<<" ==> [event] WallId  "<<endl;
             #endif
             logger.log_scalar_increment(Logger::WALL);
             return true;
@@ -85,8 +89,8 @@ public:
         if(is_absolut_goal(pos_E))
         {
             #ifdef PRINT
-            cout<<"[event] GoalId => ";
-            cout<<"[real] "<<s_state.to_string_state()<<endl;
+            std::cout<<"run: "<<episodes<<"\t[state] "<<s_state.to_string_state()<<"\t";
+            cout<<" ==> [event] Goal  "<<endl;
             #endif
             logger.log_scalar_increment(Logger::GOAL);
             return true;
@@ -95,8 +99,8 @@ public:
         if(is_absolut_collision(pos_E,pos_P))
         {
             #ifdef PRINT
-            cout<<"[event] CollId => ";
-            cout<<"[real] "<<s_state.to_string_state()<<endl;
+            std::cout<<"run: "<<episodes<<"\t[state] "<<s_state.to_string_state()<<"\t";
+            cout<<" ==> [event] Collision  "<<endl;
             #endif
             logger.log_scalar_increment(Logger::COLL);
             return true;
@@ -124,17 +128,17 @@ public:
         this->evader->set_start_point(s_state);
         this->pursuer->set_start_point(s_state);
         s_state.state_time=0;
-        s_state.jump=0;
+        s_state.jump=1;
+        pursuer->update_state(s_state);
+
     }
     void take_action_pursuer()
     {
         //auto speed = s_state.get_speed(evader->get_id());
         //s_state.set_speed(evader->get_id(),Point(0));
-
-        pursuer->update_state(s_state);
         auto action_p = pursuer->get_action(s_state);
 #ifdef PRINT
-        std::cout<<"run: "<<episodes<<"\t[state] "<<s_state.to_string_state()<<"\t";
+        //std::cout<<"run: "<<episodes<<"\t[state] "<<s_state.to_string_state()<<"\t";
         cout<<"[action] "<<action_p.to_str()<<endl;
 #endif
         s_state.applyAction(this->pursuer->get_id(),action_p,this->pursuer->get_max_speed(),s_state.jump);
@@ -145,6 +149,9 @@ public:
     void take_action_evader()
     {
         evader->make_action(s_state);
+
+        pursuer->update_state(s_state);
+
 
     }
     void set_jump()

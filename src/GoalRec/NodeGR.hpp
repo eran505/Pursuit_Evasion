@@ -13,7 +13,7 @@ struct NodeG{
     vector<pair<Point,std::vector<u_int16_t>>> goal_list;
     vector<double> goal_likelihood;
     int min_step=std::numeric_limits<int>::max();;
-
+public:
     NodeG():pos(0),parent(nullptr),child(vector<std::unique_ptr<NodeG>>()),
             goal_list(vector<pair<Point,std::vector<u_int16_t>>>()){}
     explicit NodeG(const Point& p,const Point& g,u_int16_t id_path,double likelihood):pos(p),parent(nullptr),child(vector<std::unique_ptr<NodeG>>()),
@@ -22,10 +22,10 @@ struct NodeG{
         this->goal_likelihood.push_back(likelihood);
     }
 
-    u_int64_t hash_it()
+    u_int64_t hash_it()const
     {
-        u_int64_t hash_number = pos.hashConst();
-        hash_number = pos.expHash();
+        //u_int64_t hash_number = pos.hashConst();
+        u_int64_t hash_number = pos.expHash();
         for (const auto& item : goal_list) {
             for(const auto& path_id : item.second){
                 hash_number ^=  ((path_id+10) * 2654435761) + 2654435769 + (hash_number << 6) + (hash_number >> 2);
@@ -71,6 +71,7 @@ struct NodeG{
         str.append(this->pos.to_str());
         return str;
     }
+
 
 };
 #endif //PE_NODEGR_HPP

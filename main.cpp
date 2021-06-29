@@ -24,7 +24,7 @@ int main() {
 
     //log the con.csv file
     Logger::copy_file(root_dir+LOG_DIR,csv_path);
-
+    Logger loggerTime(root_dir,"time");
     std::vector<int> gr_id = {};
 
     for (int i = 1; i < rowsCsv.size(); ++i) {
@@ -56,7 +56,8 @@ int main() {
         std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::nanoseconds> (end - begin).count() << "[ns]" << std::endl;
         std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "[s]" << std::endl;
 
-        break;
+        loggerTime.log_string_row({conf.idNumber,std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count())});
+
     }
 
     for (int idx : gr_id) {

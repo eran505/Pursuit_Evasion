@@ -4,6 +4,8 @@
 
 #ifndef PE_STATEDATA_HPP
 #define PE_STATEDATA_HPP
+#include <utility>
+
 #include "utils/game_util.hpp"
 #include "GoalRec//NodeGR.hpp"
 
@@ -25,20 +27,28 @@ public:
 
 struct Complex{
 public:
-    NodeG* ptr;
-    explicit Complex(NodeG *ptr_n):ptr(ptr_n){}
-    Complex():ptr(nullptr){}
+    std::vector<NodeG*> ptr;
+    //explicit Complex(NodeG *ptr_n):ptr(ptr_n){}
+    Complex():ptr(0){}
 
     [[nodiscard]] u_int64_t hash_it() const{
-        if(!ptr) return 0;
-        return ptr->hash_it();
+        if(ptr.empty()) return 0;
+        u_int64_t h=0;
+        std::for_each(ptr.begin(),ptr.end(),[&h](NodeG* n){
+            h+=n->hash_it();
+        });
+        return h;
     }
 
     [[nodiscard]] string to_string() const{
-        if(!ptr) return "";
-        return ptr->node_to_string();
+        if(ptr.empty()) return "";
+        string h;
+        std::for_each(ptr.begin(),ptr.end(),[&h](NodeG* n){
+            h+=n->node_to_string()+" | ";
+        });
+        return h;
     }
-    Complex& operator=(NodeG* _ptr){ptr=_ptr; return *this;}
+    Complex& operator=(std::vector<NodeG*> _ptr){ptr=std::move(_ptr); return *this;}
 
 
 };
