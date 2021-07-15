@@ -39,17 +39,22 @@ public:
         conf.options=0;
         conf.h=0;
         auto agent_p = std::make_unique<PRecAgent>(conf.maxA,conf.maxD,agentEnum::D,conf.home,conf._seed,conf.posDefender);
-        agent_p->intial_args(e->list_only_pos(),e->get_copy_probabilities());
+        agent_p->intial_args(e->list_only_pos(),e->get_copy_probabilities(),e->get_paths_names());
         return std::move(agent_p);
 
     }
 
+    static std::unique_ptr<RTDP> init_RTDP(const configGame& conf,const StaticPolicy* e,int idx_path)
+    {
+        Point start_p = conf.posDefender.front();
+        auto agent_p = std::make_unique<RTDP>(e,conf,idx_path);
+        return std::move(agent_p);
+    }
     static std::unique_ptr<RTDP> init_RTDP(const configGame& conf,const StaticPolicy* e)
     {
         Point start_p = conf.posDefender.front();
         auto agent_p = std::make_unique<RTDP>(e,conf);
         return std::move(agent_p);
-
     }
     static std::unique_ptr<StaticPolicy> init_attacker(const configGame& conf,bool save=true)
     {

@@ -30,8 +30,9 @@ class DPGoalRec:public Policer{
     agentEnum p = agentEnum::D;
 public:
 
-    explicit DPGoalRec(int seed,int max_a,int max_d,const vector_paths& pathz, vector<double> &&prob_vec ):GR(seed,max_a,max_d){
-        GR.load_agent_paths(pathz,std::move(prob_vec));
+
+    explicit DPGoalRec(int seed,int max_a,int max_d,const vector_paths& pathz, vector<double> &&prob_vec , const std::vector<u_int16_t> &names):GR(seed,max_a,max_d){
+        GR.load_agent_paths(pathz,std::move(prob_vec),names);
     }
 
     void update_state(State<> &s)
@@ -65,7 +66,8 @@ public:
         }
     }
 
-
+        // [s] = F(time_step,loc,path_id) -> {B states} , loc , time_step
+        // loc_time s
 };
 
 

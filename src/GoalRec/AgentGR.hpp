@@ -37,14 +37,13 @@ public:
         s.set_speed(my_id,Point(0));
     };
     void update_state(State<> &s){};
-    void intial_args(const std::vector<std::vector<Point>> &pathz,vector<double> &&path_probabilties);
+    void intial_args(const std::vector<std::vector<Point>> &pathz,vector<double> &&path_probabilties,std::vector<u_int16_t> &&names);
     Point get_inital_place();
 };
 
 
-void PRecAgent::intial_args(const vector<std::vector<Point>> &pathz, vector<double> &&path_probabilties) {
-    this->GR.load_agent_paths(pathz,std::move(path_probabilties));
-
+void PRecAgent::intial_args(const vector<std::vector<Point>> &pathz, vector<double> &&path_probabilties,std::vector<u_int16_t> &&names) {
+    this->GR.load_agent_paths(pathz,std::move(path_probabilties),names);
 }
 
 PRecAgent::PRecAgent(int A_max,int D_max, agentEnum agentId, string home, int seed,const std::vector<Point>& l_start

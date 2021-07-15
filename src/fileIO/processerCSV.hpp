@@ -103,7 +103,7 @@ struct configGame{
     string config;
     vector<Point> posAttacker;
     int maxA=2;
-    u_int levelz=3;
+    u_int levelz=0;
 
     std::chrono::duration<long,std::ratio<1,1>>::rep timeStart{};
     int maxD=1;
@@ -165,7 +165,7 @@ public:
             h = stoi(row[13]);
         if(row.size()>14)
             a = stoi(row[14]);
-        this->levelz=int(std::log2(this->sizeGrid.getMax()))+1;
+        //this->levelz=int(std::log2(this->sizeGrid.getMax()))+1;
         const auto s = std::chrono::system_clock::now();
         //std::chrono::duration<long,std::ratio<1,1>>::rep
         timeStart = std::chrono::duration_cast<std::chrono::microseconds>(s.time_since_epoch()).count();

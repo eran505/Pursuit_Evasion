@@ -74,6 +74,7 @@ public:
     [[nodiscard]] bool isEndState(agentEnum idStr)const;
 
 
+
     void getAllPos(vector<Point> &vec)const;
 
     bool applyAction( agentEnum id, const Point &action, int max_speed) {

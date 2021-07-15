@@ -46,9 +46,9 @@ public:
     NodeG* get_root(){return this->root.get(); ;}
     void set_my_location(const Point& p);
 
-    void load_agent_paths(const std::vector<std::vector<Point>> &pathz,vector<double> &&path_probabilties);
+    void load_agent_paths(const std::vector<std::vector<Point>> &pathz,vector<double> &&path_probabilties,const vector<u_int16_t>& paths_name);
 
-    void add_path(const std::vector<Point> &l_path,u_int16_t  id_path,NodeG* cur_root);
+    void add_path(const std::vector<Point> &l_path,u_int16_t  id_path,NodeG* cur_root,u_int16_t name);
 
     static NodeG* search_node(const vector<std::unique_ptr<NodeG>> &continer,const Point& p);
 
@@ -90,29 +90,28 @@ public:
 };
 
 
-void GoalRecognition::load_agent_paths(const std::vector<std::vector<Point>> &pathz,vector<double> &&path_probabilties) {
+void GoalRecognition::load_agent_paths(const std::vector<std::vector<Point>> &pathz,vector<double> &&path_probabilties,const std::vector<u_int16_t>& paths_name) {
     probabilities = std::move(path_probabilties);
     all_pathz = pathz;
-    for(size_t i=0; i < pathz.size();++i) {
+    for (size_t i = 0; i < pathz.size(); ++i)
+        GoalRecognition::add_path(pathz[i], u_int16_t(i), root.get(),paths_name[i]);
 
-        GoalRecognition::add_path(pathz[i], u_int16_t(i), root.get());
-    }
    // printTree();
 }
 
 
-void GoalRecognition::add_path(const std::vector<Point> &l_path,const u_int16_t id_path,NodeG* cur_root) {
+void GoalRecognition::add_path(const std::vector<Point> &l_path,const u_int16_t id_path,NodeG* cur_root,u_int16_t name) {
 
     NodeG* node = cur_root;
     for (size_t i=0;i<l_path.size();++i)
     {
 
         if (auto res = search_node(node->child,l_path[i]); res == nullptr){
-            auto& bPtr = node->child.emplace_back(std::make_unique<NodeG>(l_path[i],l_path.back(),id_path,probabilities[id_path]));
+            auto& bPtr = node->child.emplace_back(std::make_unique<NodeG>(l_path[i],l_path.back(),name,probabilities[id_path]));
             node = bPtr.get();
         }
         else{
-            res->add_goal(l_path.back(),id_path,probabilities[id_path]); // add goal if need
+            res->add_goal(l_path.back(),name,probabilities[id_path]); // add goal if need
             node = res;
 
         }

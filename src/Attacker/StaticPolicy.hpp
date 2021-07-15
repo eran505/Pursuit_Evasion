@@ -29,7 +29,7 @@ class StaticPolicy{
     string exp_id;
     bool save_data = true;
 public:
-    StaticPolicy(const Point &gridSize,uint maxSpeed,agentEnum id,u_int16_t num_of_paths,std::string home_path,const seq_goals& goals_points,const seq_starting& starting_points,int seed,string id_exp,bool save=true)
+    StaticPolicy(const Point &gridSize,uint maxSpeed,agentEnum id,u_int16_t num_of_paths,std::string home_path,const seq_goals& goals_points,const seq_starting& starting_points,int seed,string id_exp,bool save=true,std::vector<int> names={})
     :gen(seed,gridSize,maxSpeed),randomizer(seed),max_speed(maxSpeed),exp_id(std::move(id_exp))
     {
         home = std::move(home_path);
@@ -37,8 +37,12 @@ public:
         auto [list_pathz,probablity_list] = gen.geneate_path_loopV2(goals_points,starting_points,num_of_paths);
         make_mapper(list_pathz,probablity_list);
         save_data = save;
-    }
 
+    }
+    void constant_path(int i)
+    {
+        mapper->set_constant(i);
+    }
     void set_mapper(std::unique_ptr<PathMapper<u_int32_t>> mapper_ptr)
     {
         this->mapper=std::move(mapper_ptr);
@@ -48,7 +52,7 @@ public:
     {
         return std::move(mapper);
     }
-
+    vector<u_int16_t > get_paths_names()const{ return this->mapper->get_names_pathz();}
 
     agentEnum get_id(){return my_id;}
     u_int32_t get_max_len_path(){return mapper->get_max_path_size();}
@@ -135,9 +139,9 @@ public:
 
     }
 private:
-    void make_mapper(std::vector<APath> all_pathz, std::vector<double> porbablites_arr)
+    void make_mapper(std::vector<APath> all_pathz, std::vector<double> porbablites_arr,std::vector<u_int16_t> l={})
     {
-        mapper=std::make_unique<PathMapper<u_int32_t>>(std::move(all_pathz),std::move(porbablites_arr));
+        mapper=std::make_unique<PathMapper<u_int32_t>>(std::move(all_pathz),std::move(porbablites_arr),l);
     }
     u_int64_t get_hash_state(const State<>& s)const {
         //cout<<s->to_string_state()<<endl;

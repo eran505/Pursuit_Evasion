@@ -75,7 +75,7 @@ public:
         str_to_string+=')';
         return str_to_string;
     }
-    string to_hash_str() const {
+    [[nodiscard]] string to_hash_str() const {
         string str;
         for (int i = 0; i < D; ++i) {
             str += std::to_string(this->operator[](i));
@@ -126,7 +126,7 @@ public:
         this->array[1]*=number;
         this->array[2]*=number;
     }
-    int sumPoint() const
+    [[nodiscard]] int sumPoint() const
     {
         int sum=0;
         for (int i = 0; i < D; ++i) {

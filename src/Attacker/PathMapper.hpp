@@ -17,6 +17,7 @@ typedef AStar::StatePoint StatePoint;
 template <typename K>
 class PathMapper{
     std::vector<std::vector<StatePoint>> all_paths;
+    std::vector<u_int16_t> paths_names;
     unsigned int size_pathz=0;
     std::vector<double> probabilities;
     u_int64_t time_t = 0;
@@ -24,8 +25,10 @@ class PathMapper{
     u_int32_t step_counter=0;
     std::unordered_map<uint64_t,vector<K>> mapper_pathz;
     std::vector<u_int32_t> memo;
+    bool is_constant=false;
+    int path_const = 0;
 public:
-    explicit PathMapper(vector<vector<StatePoint>> pathz,std::vector<double> probabilities_paths)
+    explicit PathMapper(vector<vector<StatePoint>> pathz,std::vector<double> probabilities_paths,const std::vector<u_int16_t> &path_name_)
             :all_paths(std::move(pathz)),size_pathz(all_paths.size())
             ,probabilities(std::move(probabilities_paths)){
         crate_maper();
@@ -38,6 +41,10 @@ public:
 
         }
         memo=std::vector<u_int32_t>(max);
+        if (path_name_.empty())
+            paths_names= range_n(all_paths.size());
+        else
+            std::copy(path_name_.begin(),path_name_.end(),std::back_inserter(paths_names));
 
     }
     u_int32_t get_max_path_size()
@@ -49,6 +56,14 @@ public:
                 max=path_item.size();
         }
         return max;
+    }
+    void set_constant(int k)
+    {
+        if(k>=0)
+            is_constant=true;
+        else
+            is_constant=false;
+        path_const = k;
     }
     PathMapper()=default;
     u_int32_t get_time_step(){return time_t;}
@@ -65,9 +80,12 @@ public:
             ++i;
         }
         this->current_path=i;
+        if(is_constant)
+            this->current_path=this->path_const;
         //this->current_path=22;
         this->time_t=0;
         step_counter=0;
+
         this->memo[step_counter]=time_t;
     }
     vector<tuple<StatePoint,int,double>> get_next_states(u_int64_t hash_state,int jumps)
@@ -105,6 +123,7 @@ public:
     }
     [[nodiscard]] std::vector<std::vector<StatePoint>> get_all_pathz()const{return all_paths;}
     [[nodiscard]] const std::vector<std::vector<StatePoint>>& get_all_pathz_ref()const{return all_paths;}
+    [[nodiscard]] vector<u_int16_t> get_names_pathz()const{return paths_names;}
     [[nodiscard]] std::vector<double> get_all_probabilites()const{return probabilities;}
     [[nodiscard]] const std::vector<double>& get_all_probabilites_ref()const{return probabilities;}
     [[nodiscard]] std::vector<std::vector<Point>> get_all_pos()const
@@ -179,7 +198,13 @@ private:
     }
 
 
-
+    std::vector<u_int16_t> range_n(u_int16_t x)
+    {
+        std::vector<u_int16_t > l;
+        for( u_int16_t i = 0; i < x; i++ )
+            l.push_back(i);
+        return l;
+    }
 
 };
 

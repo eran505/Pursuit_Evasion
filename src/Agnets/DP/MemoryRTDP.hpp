@@ -23,16 +23,16 @@ class MemoryRtdp{
     Randomizer rand;
     std::unordered_map<u_int64_t,State<>> debug_map;
     Heuristicer heuristicer;
-
+    bool verbose=false;
 
 public:
-    explicit MemoryRtdp(int seed,vector<vector<Point>> &&pathz_all,int mode,int option,int h,int max_speed):Qtable(std::make_unique<std::unordered_map<Entry ,Row>>()),
-    id_to_point(Point::getVectorActionUniqie()),rand(seed),heuristicer(max_speed,h,pathz_all){
+    explicit MemoryRtdp(int seed,vector<vector<Point>> &&pathz_all,std::vector<double> &&prior_paths,vector<u_int16_t> &&names_paths,int mode,int option,int h,int max_speed):Qtable(std::make_unique<std::unordered_map<Entry ,Row>>()),
+    id_to_point(Point::getVectorActionUniqie()),rand(seed),heuristicer(max_speed,h,pathz_all,prior_paths,std::move(names_paths)){
         init_object(mode,h);
     }
 
-    MemoryRtdp(int seed,vector<vector<Point>> &&pathz_all,int mode,int option,int h,std::unique_ptr<Table> ptr_Q,int max_speed):Qtable(std::move(ptr_Q)),
-    id_to_point(Point::getVectorActionUniqie()),rand(seed),heuristicer(max_speed,h,pathz_all){
+    MemoryRtdp(int seed,vector<vector<Point>> &&pathz_all,std::vector<double> &&prior_paths,vector<u_int16_t> &&names_paths,int mode,int option,int h,std::unique_ptr<Table> ptr_Q,int max_speed):Qtable(std::move(ptr_Q)),
+    id_to_point(Point::getVectorActionUniqie()),rand(seed),heuristicer(max_speed,h,pathz_all,prior_paths,std::move(names_paths)){
         init_object(mode,h);
     }
     void init_object(int mode,int h)
@@ -54,6 +54,10 @@ public:
     const Row &get_row_qTable(const State<> &s, Entry id_state);
     void set_Q_table(std::unique_ptr<Table> && t){this->Qtable=std::move(t);}
     std::unique_ptr<Table> get_Q_table();
+    void set_print_mode(int mode)
+    {
+        verbose = mode==1;
+    }
 };
 
 std::pair<Point, u_int64_t> MemoryRtdp::get_argMAx(const State<> &s) {
@@ -86,6 +90,8 @@ const Row& MemoryRtdp::get_row_qTable(const State<> &s,Entry id_state)
 }
 
 void MemoryRtdp::Q_table_add_row(const State<> &s,Entry key_entry) {
+
+    if(verbose) cout<<"[H] "<<s.to_string_state()<<endl;
 
     Qtable->try_emplace(key_entry,heuristicer.heuristic(s));
     //Qtable->try_emplace(key_entry,27,1);

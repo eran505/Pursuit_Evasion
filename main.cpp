@@ -13,10 +13,9 @@ void game_start(configGame &conf);
 
 int main() {
 
-    u_int epideos_number = 10000000; //2000000
-    int seed=3;
+    int seed=4;
     std::cout << "Hello, World!" << std::endl;
-    std::string csv_path= getProjectDir() + "/csv/con16.csv";
+    std::string csv_path= getProjectDir() + "/csv/con2.csv";
     cout<<"csv_path: "<<csv_path<<endl;
     CSVReader reader(csv_path,',');
     vector<vector<string>> rowsCsv = reader.getDataCSV();
@@ -26,7 +25,7 @@ int main() {
     Logger::copy_file(root_dir+LOG_DIR,csv_path);
     Logger loggerTime(root_dir,"time");
     std::vector<int> gr_id = {};
-
+    bool is_saved= true;
     for (int i = 1; i < rowsCsv.size(); ++i) {
         srand(seed);
         auto conf = configGame(rowsCsv[i],seed);
@@ -42,10 +41,11 @@ int main() {
         s.add_player_state(agentEnum::D,conf.posDefender.front(),Point(0),adata);
         cout<<s.to_string_state()<<endl;
 
-        auto evder_agent = Initializer::init_attacker(conf, true );
+
+        auto evder_agent = Initializer::init_attacker(conf, is_saved );
         auto pursurer_agent = Initializer::init_RTDP(conf,evder_agent.get());
 
-
+        is_saved=false;
         PathDecomposit dec = PathDecomposit(evder_agent.get(),conf,s);
 
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
@@ -78,7 +78,7 @@ void game_start(configGame &conf)
     s.add_player_state(agentEnum::D,conf.posDefender.front(),Point(0),adata);
     cout<<s.to_string_state()<<endl;
 
-    auto evder_agent = Initializer::init_attacker(conf, true);
+    auto evder_agent = Initializer::init_attacker(conf, false);
     auto pursurer_agent = Initializer::init_GR(conf,evder_agent.get());
     auto sim  = Emulator(pursurer_agent.get(),evder_agent.get(), std::move(s),conf);
     sim.main_loop(8000);//2000000

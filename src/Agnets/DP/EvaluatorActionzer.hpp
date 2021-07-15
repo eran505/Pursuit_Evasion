@@ -28,6 +28,8 @@ public:
 
     void set_jumps(State<> &s);
 
+    //static bool is_one_plan(const State<> &state_);
+
 
     Cell plan_rec_helper(State<> &s);
     static  vector<vector<NodeG*>> NodeG_to_vectors(std::vector<NodeG*> l);
@@ -122,6 +124,7 @@ Cell Evaluator::plan_rec_helper(State<> &s) {
         expected_sum_reward+=evalute_state(s,sum_prob/sum_all);
         assert_num+=sum_prob/sum_all;
     }
+
     assert(assert_num>0.99);
     return expected_sum_reward*std::pow(R.discountF,steps);
 
@@ -145,5 +148,7 @@ vector<vector<NodeG*>> Evaluator::NodeG_to_vectors(std::vector<NodeG*> l)
 
 
 }
+
+
 
 #endif //PE_EVALUATORACTIONZER_HPP

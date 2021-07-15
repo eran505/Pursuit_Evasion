@@ -16,6 +16,7 @@ class Emulator{
     State<> s_state;
     Logger logger;
     int episodes=0;
+    int done=0;
     std::function<int(const Point&,const Point&)> jump_func;
 public:
 
@@ -42,14 +43,14 @@ public:
         reset_state();
         while(true)
         {
-            set_jump();
+            set_jump(); // check if the map state is correct
 #ifdef PRINT
             std::cout<<"run: "<<episodes<<"\t[state] "<<s_state.to_string_state()<<"\t";
 #endif
             take_action_pursuer();
             take_action_evader();
 
-
+            //cout<<s_state.to_string_state()<<endl;
 
             s_state.state_time+=s_state.jump;
 
@@ -66,7 +67,8 @@ public:
         auto s_start = State<>(s_state);
         for (int i = 0; i < num_of_games; ++i) {
             game_sim();
-            if (this->logger.get_done()) break;
+            if (this->logger.get_done()) done++;
+            if(done==1) break;
         }
     }
     bool check_condition()

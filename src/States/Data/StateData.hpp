@@ -40,6 +40,20 @@ public:
         return h;
     }
 
+    [[nodiscard]] std::vector<u_int16_t> get_plans() const{
+        if(this->ptr.size()==1) return ptr[0]->get_plans();
+        std::vector<u_int16_t > l = ptr[0]->get_plans();;
+        for (int i = 1; i < this->ptr.size(); ++i) {
+            auto res = ptr[i]->get_plans();
+            for(auto plan_idx: res)
+                if(auto pos = std::find(l.begin(),l.end(),plan_idx);pos == l.end())
+                {
+                    l.push_back(plan_idx);
+                }
+        }
+        return l;
+    }
+
     [[nodiscard]] string to_string() const{
         if(ptr.empty()) return "";
         string h;

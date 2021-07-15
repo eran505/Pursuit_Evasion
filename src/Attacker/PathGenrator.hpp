@@ -158,16 +158,20 @@ private:
             p.array[1]=int(this->grid_size[1]*get_y_value_static_point_3(this->random_gen.get_double()));
         else if (div==5)
             p.array[1]=int(this->grid_size[1]*get_y_value_static_point_5(this->random_gen.get_double()));
+        else if (div==1)
+            p.array[1]=int(this->grid_size[1]*0.5);
+        else if (div==2)
+            p.array[1]=int(this->grid_size[1]*get_y_value_static_point_2(this->random_gen.get_double()));
         else
-            p.array[1]=int(this->grid_size[1]*get_y_value_static_point_4(this->random_gen.get_double()));
-        p.array[2]=0;
+            p.array[1]=int(this->grid_size[1]*get_y_value_static_point_9(this->random_gen.get_double()));
+        p.array[2]=3;
         cout<<"Random--->"<<p.to_str()<<endl;
         return {p,Point(1,1,0)};
     }
     std::vector<StatePoint> add_middle_point_at_random(const std::vector<StatePoint> &A_list)
     {
         //return {*A_list.begin(),get_random_pointV1(0.6,5),A_list.back()};
-        return {*A_list.begin(),get_random_pointV1(0.25,4),get_random_pointV1(0.7,5),A_list.back()};
+        return {*A_list.begin(),get_random_pointV1(0.25,9),get_random_pointV1(0.75,9),A_list.back()};
         //return {*A_list.begin(),get_random_point(0.4),A_list.back()};
     }
     void pathsToDict(const vector<AStar::StatePoint>& allPath) {
@@ -223,6 +227,11 @@ private:
         else return 0.9;
 
     }
+    static double get_y_value_static_point_2(double seed)
+    {
+        if(seed<0.5) return 0.33;
+        return 0.66;
+    }
     static double get_y_value_static_point_5(double seed)
     {
 
@@ -235,7 +244,19 @@ private:
             //if(seed<0.7) return 0.7
         else return 0.96;
     }
+    static double get_y_value_static_point_9(double seed)
+    {
 
+        if(seed<0.1) return 0.1;
+        if(seed<0.2) return 0.2;
+        if(seed<0.3) return 0.3;
+        if(seed<0.4) return 0.4;
+        if(seed<0.4) return 0.5;
+        if(seed<0.6) return 0.6;
+        if(seed<0.7) return 0.7;
+        if(seed<0.8) return 0.8;
+        else return 0.9;
+    }
 
     static double get_y_value_static_point_v1(double seed,u_int16_t num_of_div)
     {

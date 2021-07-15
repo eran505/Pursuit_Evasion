@@ -8,7 +8,7 @@
 
 struct NodeG{
     Point pos;
-    NodeG* parent;
+    NodeG* parent=nullptr;
     vector<std::unique_ptr<NodeG>> child;
     vector<pair<Point,std::vector<u_int16_t>>> goal_list;
     vector<double> goal_likelihood;
@@ -22,7 +22,15 @@ public:
         this->goal_likelihood.push_back(likelihood);
     }
 
-    u_int64_t hash_it()const
+//    explicit NodeG(const NodeG* ptr)
+//    {
+//        return NodeG(*ptr);
+//    }
+    NodeG deep_copy_singel(const NodeG* ptr)
+    {
+        return NodeG(ptr->pos,ptr->goal_list.front().first,ptr->goal_list.front().second.front(),ptr->goal_likelihood.front());
+    }
+    [[nodiscard]] u_int64_t hash_it()const
     {
         //u_int64_t hash_number = pos.hashConst();
         u_int64_t hash_number = pos.expHash();
@@ -72,6 +80,14 @@ public:
         return str;
     }
 
+    [[nodiscard]] std::vector<u_int16_t > get_plans()const{
+        std::vector<u_int16_t > ans;
+        for (const auto &item :this->goal_list) {
+            for (auto planz: item.second)
+                ans.push_back(planz);
+        }
+        return ans;
+    }
 
 };
 #endif //PE_NODEGR_HPP
