@@ -27,7 +27,7 @@ class Logger{
     u_int64_t counter=0;
     std::string home;
     Saver<string> file_manger;
-    u_int32_t log_every=1000;
+    u_int32_t log_every=10000;
     bool done = false;
 public:
     enum info_val {ITER,COLL,GOAL,WALL};
@@ -42,7 +42,7 @@ public:
         file_manger.set_header_vec({"ID","Time"});
     }
     bool get_done()const{return done;};
-
+    bool set_done(bool bol){done=bol;};
 public:
     void log_scalar_increment(info_val val){
         info[val]++;

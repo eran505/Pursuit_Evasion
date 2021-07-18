@@ -163,7 +163,7 @@ private:
     u_int32_t get_min_step_diff_last_orgin(const Point& p_pos,size_t index_path, u_int start_look)const
     {
         u_int32_t min_step= Point::distance_min_step(p_pos,all_paths[index_path][start_look]);
-        for (int i = int(start_look)+1; i < all_paths[index_path].size() ; ++i) {
+        for (int i = int(start_look)+1; i < all_paths[index_path].size()-1 ; ++i) {
             auto res = Point::distance_min_step(p_pos,all_paths[index_path][i]);
             if (min_step>res) min_step=res;
         }

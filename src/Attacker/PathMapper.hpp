@@ -47,6 +47,7 @@ public:
             std::copy(path_name_.begin(),path_name_.end(),std::back_inserter(paths_names));
 
     }
+    u_int32_t get_all_paths_size(){return all_paths.size();}
     u_int32_t get_max_path_size()
     {
         u_int32_t max =0;

@@ -23,9 +23,11 @@ class MemoryRtdp{
     Randomizer rand;
     std::unordered_map<u_int64_t,State<>> debug_map;
     Heuristicer heuristicer;
+    //std::vector<State<>> tml_list_to_del;
     bool verbose=false;
 
 public:
+
     explicit MemoryRtdp(int seed,vector<vector<Point>> &&pathz_all,std::vector<double> &&prior_paths,vector<u_int16_t> &&names_paths,int mode,int option,int h,int max_speed):Qtable(std::make_unique<std::unordered_map<Entry ,Row>>()),
     id_to_point(Point::getVectorActionUniqie()),rand(seed),heuristicer(max_speed,h,pathz_all,prior_paths,std::move(names_paths)){
         init_object(mode,h);
@@ -43,6 +45,10 @@ public:
         else if(mode==2) hash_func=[](const State<> &ptrS){return ptrS.getHashValueT();};
         else assert(false);
     }
+
+    //[[maybe_unused]] auto retrun_list_h(){return this->tml_list_to_del;}
+
+
     std::unordered_map<u_int64_t,State<>> get_map_state(){return std::move(debug_map);}
     std::pair<Point,u_int64_t> get_argMAx(const State<> &s);
     u_int64_t get_entry(const State<> &s);
@@ -93,9 +99,22 @@ void MemoryRtdp::Q_table_add_row(const State<> &s,Entry key_entry) {
 
     if(verbose) cout<<"[H] "<<s.to_string_state()<<endl;
 
+//    auto s_tmp = State<>(s);
+//    s_tmp.set_speed(agentEnum::A,Point(0));
+//    if(s_tmp.to_string_state()=="2_A_(3, 11, 1, )_(0, 0, 0, )|D_(19, 9, 1, )_(-1, 0, 1, )|_{ 0}_N_(3, 11, 1, ) | _1" or
+//            s_tmp.to_string_state()=="3_A_(7, 12, 2, )_(0, 0, 0, )|D_(19, 10, 1, )_(0, 1, 0, )|_{ 0}_N_(7, 12, 2, ) | _2")
+//    {
+//        tmp_var = heuristicer.heuristic(s);
+//        int ctr=0;
+//        for(auto item : tmp_var)
+//            cout<<ctr++<<"="<<item<<";";
+//        cout<<endl;
+//    }else{
+//        tmp_var = heuristicer.heuristic(s);
+//    }
+
+
     Qtable->try_emplace(key_entry,heuristicer.heuristic(s));
-    //Qtable->try_emplace(key_entry,27,1);
-    //heuristic(s,key_entry);
     debug_map.try_emplace(key_entry,s);
 
 
@@ -113,9 +132,10 @@ std::unique_ptr<Table> MemoryRtdp::get_Q_table(){
 
 void MemoryRtdp::set_value_matrix(Entry entry, size_t second_entry, Cell val) {
     auto& vec = this->Qtable->at(entry);
-    //cout<<vec<<endl;
     auto old = vec[second_entry];
-    //assert(old>=val);
+//    if(!(old>=val))
+//        cout<<old<<":->"<<val<<endl;
+//    assert(old>=val);
 
 
     vec[second_entry]=val;
@@ -127,6 +147,7 @@ Cell MemoryRtdp::get_max_val(const State<> &s){
     auto r = this->get_row_qTable(s,this->get_entry(s));
     return *std::max_element(r.begin(),r.end());
 }
+
 
 #ifndef PE_HEURISTIC_HPP
 #define PE_HEURISTIC_HPP

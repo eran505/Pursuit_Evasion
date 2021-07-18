@@ -13,6 +13,7 @@ template< typename P, typename E=StaticPolicy >
 class Emulator{
     E* evader;
     P* pursuer;
+    u_int16_t max_number_paths=-1;
     State<> s_state;
     Logger logger;
     int episodes=0;
@@ -31,6 +32,7 @@ public:
             jump_func = Jumper::get_jumps;
             cout<<"[options] enable"<<endl;
         } else assert(false);
+        max_number_paths = this->evader->get_all_paths_size();
     }
 
     void game_sim()
@@ -62,13 +64,15 @@ public:
         }
 
     }
+
+
     void main_loop(u_int32_t num_of_games)
     {
         auto s_start = State<>(s_state);
         for (int i = 0; i < num_of_games; ++i) {
             game_sim();
-            if (this->logger.get_done()) done++;
-            if(done==1) break;
+            if (this->logger.get_done())done++;
+            if(done==1)break;
         }
     }
     bool check_condition()

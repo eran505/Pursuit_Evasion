@@ -63,7 +63,7 @@ Cell Evaluator::evalute_state(const State<> &s, double transition_probability) {
 #ifdef PRINT
     cout<<"[evalute_state] "<<s.to_string_state()<<"  V="<<res<<endl;
 #endif
-    return res;
+    return Cell(res);
 }
 
 tuple<double,bool> Evaluator::EvalState2(const State<> &s)

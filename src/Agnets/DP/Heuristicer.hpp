@@ -26,8 +26,8 @@ public:
     explicit Heuristicer(int maxP,int h,const vector<vector<Point>>& l_pathz,const vector<double> &prob,std::vector<u_int16_t> &&vec_names):max_speed_P(maxP),trajectories_tree(l_pathz,prob,std::move(vec_names))
     {
         if (h==0){
-            H = [](const State<> &ptrS) { return 0;};
-            H_plan=[](const State<> &ptrS,int index_plan) { return 0;};
+            H = [this](const State<> &ptrS) { return R.CollReward;};
+            H_plan=[this](const State<> &ptrS,int index_plan) { return R.CollReward;};
         }
         if (h==1)
         {

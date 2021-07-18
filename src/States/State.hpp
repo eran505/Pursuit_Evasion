@@ -139,6 +139,10 @@ public:
         //u_int64_t  seed = this->budgets.hash_it();
         u_int64_t seed =0;
 
+//        seed ^= this->dataPoint[agentEnum::A*2].array[0] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
+//        seed ^= this->dataPoint[agentEnum::A*2].array[1] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
+//        seed ^= this->dataPoint[agentEnum::A*2].array[2] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
+
         seed ^= this->dataPoint[agentEnum::D*2].array[0] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
         seed ^= this->dataPoint[agentEnum::D*2].array[1] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
         seed ^= this->dataPoint[agentEnum::D*2].array[2] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);

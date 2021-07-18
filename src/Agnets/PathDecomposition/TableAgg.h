@@ -24,7 +24,7 @@ public:
     {
         return heuristic.heuristic_plan(look_up_state.at(state_id_),plan_idx);
     }
-
+    std::unordered_map<u_int64_t ,State<>> rtrun_dico_map(){return this->look_up_state;}
     auto infer_state(Qtable_* l_tabel)
     {
         Qtable_ t;
@@ -36,15 +36,14 @@ public:
 
             if(new_s_hash ==entry.first)
                 continue;
-            cout<<"[OLD] "<<s.to_string_state()<<endl;
-            cout<<"[NEW] "<<state_new_s.to_string_state()<<endl;
-            cout<<"----\n";
+//            cout<<"[OLD] "<<s.to_string_state()<<endl;
+//            cout<<"[NEW] "<<state_new_s.to_string_state()<<endl;
+//            cout<<"----\n";
             t.emplace(new_s_hash,entry.second);
             assert(l_tabel->find(new_s_hash)==l_tabel->end());
             look_up_state.try_emplace(new_s_hash,std::move(state_new_s));
         }
         l_tabel->insert(t.begin(),t.end());
-        //cout<<"------------"<<endl;
     }
     bool is_one_plan(u_int64_t state_id_)const
     {

@@ -57,7 +57,6 @@ int main() {
         std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "[s]" << std::endl;
 
         loggerTime.log_string_row({conf.idNumber,std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count())});
-
     }
 
     for (int idx : gr_id) {

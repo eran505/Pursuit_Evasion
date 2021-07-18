@@ -67,7 +67,7 @@ void PathDecomposit::all_train()
 {
     std::unique_ptr<RTDP> pursurer_agent = decompos_paths();
     auto sim  = Emulator(pursurer_agent.get(),evader, std::move(State<>(s_state)),conf);
-    sim.main_loop(2e6); //40000000
+    sim.main_loop(15e6); //40000000
 
 }
 
@@ -85,7 +85,7 @@ void PathDecomposit::single_train()
         std::unique_ptr<RTDP> pursurer_agent = decompos_paths();
         //conf.h=hurstic;
         auto sim  = Emulator(pursurer_agent.get(),evader, std::move(State<>(s_state)),conf);
-        sim.main_loop(3e4); //50000
+        sim.main_loop(10001); //50000
         std::unique_ptr<Table> Q = pursurer_agent->get_Q_tabel();
         cout<<"Q:"<<Q->size()<<endl;
         l_Q_table.push_back(std::move(Q));
@@ -113,7 +113,22 @@ void PathDecomposit::single_train()
     std::unique_ptr<RTDP> pursurer_agent = decompos_paths();
     pursurer_agent->set_Q_table(std::move(big));
     auto sim  = Emulator(pursurer_agent.get(),evader, std::move(State<>(s_state)),conf);
-    sim.main_loop(1e6);
+    sim.main_loop(10e6);
+//    auto ctr_=0;
+//    auto x = pursurer_agent->retrun_list_h();
+//    auto map_dicto  = h_con.rtrun_dico_map();
+//    for(const auto& item_state : x)
+//    {
+//        auto h_s = item_state.getHashValueGR();
+//        if(auto pos = map_dicto.find(h_s);pos==map_dicto.end())
+//        {
+//            cout<<"S:"<<item_state.to_string_state()<<"\t h()="<<h_s<<endl;
+//        }
+//        else{
+//            ctr_++;
+//        }
+//    }
+//    cout<<"ctr_: "<<ctr_<<endl;
 }
 
 

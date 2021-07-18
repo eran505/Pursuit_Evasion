@@ -39,6 +39,7 @@ public:
         save_data = save;
 
     }
+    u_int32_t get_all_paths_size(){return mapper->get_all_paths_size();}
     void constant_path(int i)
     {
         mapper->set_constant(i);
@@ -71,6 +72,11 @@ public:
     {
         mapper->random_choose_path(randomizer.get_double());
         //time_step=0;
+    }
+    void reset_policy_by_index_path(int index_p )
+    {
+        mapper->random_choose_path(randomizer.get_double());
+
     }
     void policy_data()const {
 

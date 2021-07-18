@@ -48,6 +48,8 @@ public:
 
     void set_Q_table(std::unique_ptr<Table>&& t){this->memo_rtdp->set_Q_table(std::move(t));}
 
+    //std::vector<State<>> retrun_list_h(){return this->memo_rtdp->retrun_list_h();}
+
     std::unique_ptr<Table> get_Q_tabel(){ return this->memo_rtdp->get_Q_table();}
     std::unordered_map<u_int64_t,State<>> get_map_state(){ return std::move(this->memo_rtdp->get_map_state());}
 private:
@@ -78,7 +80,6 @@ RTDP::RTDP(const StaticPolicy *evader,const configGame& conf):
 
 
 Point RTDP::get_action(const State<> &s) {
-
     //get the argmax action in Q table
     auto [action_i,entryID] = memo_rtdp->get_argMAx(s);
     Point action = action_i;
@@ -100,15 +101,25 @@ void RTDP::update_state(State<> &s)
     //cout<<s.to_string_state()<<endl;
 }
 
+void RTDP::update(const Point &a, State<> &&s, Entry state_id) {
+
+    //cout<<"["<<s.to_string_state()<<","<<a.to_str()<<"]"<<endl;
+    Cell val = this->bellman_update(std::move(s),a);
+    //cout<<state_id<<", "<<a.hashMeAction(Point::actionMax)<<"="<<val<<endl;
+    this->memo_rtdp->set_value_matrix(state_id,a.hashMeAction(Point::actionMax),val);
+}
+
+
 Cell RTDP::bellman_update(State<> &&s ,const  Point &a){
 #ifdef PRINT
-    cout<<" [pop] "<<s.to_string_state()<<endl;
+    cout<<" [pop] "<<s.to_string_state()<<"  [A] "<<a.to_str()<<endl;
 #endif
     do_SEQ(s,a);
 #ifdef PRINT
-    cout<<"[update] "<<s.to_string_state()<<endl;
+    cout<<"[updated] "<<s.to_string_state()<<endl;
 #endif
-    if(this->mode==1) return this->evaluator.plan_rec_helper(s);
+    if(this->mode==1)
+        return this->evaluator.plan_rec_helper(s);
 
     auto seq_states = this->action_expend.expander_attacker(s);
 
@@ -140,12 +151,6 @@ void RTDP::empty_stack() {
     this->stack.clear();
 }
 
-void RTDP::update(const Point &a, State<> &&s, Entry state_id) {
-
-    Cell val = this->bellman_update(std::move(s),a);
-    //cout<<state_id<<", "<<a.hashMeAction(Point::actionMax)<<"="<<val<<endl;
-    this->memo_rtdp->set_value_matrix(state_id,a.hashMeAction(Point::actionMax),val);
-}
 
 void RTDP::do_SEQ(State<> &s,const Point& a)
 {
