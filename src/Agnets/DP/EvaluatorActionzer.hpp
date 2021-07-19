@@ -9,7 +9,7 @@
 #include "../Policer.hpp"
 #include "utils/Jumper.h"
 class Evaluator{
-
+    int option_mode = -1;
     agentEnum e=agentEnum::A;
     agentEnum p=agentEnum::D;
     std::shared_ptr<MemoryRtdp> memory_rtdp{};
@@ -17,7 +17,7 @@ class Evaluator{
 public:
 
     Evaluator()=delete;
-
+    void set_option_mode(int x){option_mode=x;}
     explicit Evaluator(std::shared_ptr<MemoryRtdp> ptr):memory_rtdp(std::move(ptr)){}
 
     Cell evalute_state(const State<> &s,double transition_probability);
@@ -93,6 +93,7 @@ void Evaluator::set_jumps(State<>& s)
 }
 
 Cell Evaluator::plan_rec_helper(State<> &s) {
+    //assert(s.jump==1);
     auto list_successors = GoalRecognition::get_all_successors(s.budgets.ptr,s.jump);
     auto list_of_list_successors = NodeG_to_vectors(list_successors);
     double sum_all=0.0;
@@ -120,7 +121,10 @@ Cell Evaluator::plan_rec_helper(State<> &s) {
         s.set_position(this->e,i.front()->pos);
         s.set_speed(this->e,Point(0));
         s.state_time=t;
-        set_jumps(s);
+        if(option_mode==0)
+            s.jump=1;
+        else
+            set_jumps(s);
         expected_sum_reward+=evalute_state(s,sum_prob/sum_all);
         assert_num+=sum_prob/sum_all;
     }

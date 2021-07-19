@@ -10,6 +10,7 @@ static int get_jumps(const Point &e, const Point &p);
 
 namespace Jumper {
     static int get_step_number(int max) {
+        if(max==0) return 1;
         auto d = std::max((int(log2(max)) + 1) - 3, 0);
         int res = std::pow(2, d);
         return res;
@@ -21,7 +22,7 @@ namespace Jumper {
 
     static int get_jumps(const Point &e, const Point &p) {
         //return 1;
-        auto x = Jumper::get_step_number(Jumper::get_dif(e, p).getMax());
+        int x = Jumper::get_step_number(Jumper::get_dif(e, p).getMax());
         //x = std::max(int(x/2),1);
         return x;
     }

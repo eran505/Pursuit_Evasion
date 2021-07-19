@@ -152,6 +152,8 @@ public:
         seed ^= this->dataPoint[agentEnum::D*2+1].array[2] + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
 
         seed ^= this->budgets.hash_it() + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
+        seed ^= this->state_time + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
+        seed ^= this->jump + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
 
         return seed;
     }

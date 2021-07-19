@@ -9,7 +9,7 @@
 #include "Game/Initializer.hpp"
 #include "TableAgg.h"
 //#include "Attacker/StaticPolicy.hpp"
-
+#include "fileIO/Qtabel_CSV.h"
 typedef std::vector<AStar::StatePoint> EvaderPath;
 
 class PathDecomposit{
@@ -20,7 +20,7 @@ class PathDecomposit{
     StaticPolicy* evader;
     configGame conf;
     vector<std::unique_ptr<Table>> l_Q_table;
-
+    bool is_save = true;
 
 public:
     PathDecomposit(StaticPolicy *evader_ptr,configGame &conf_object,const State<>& _s_state);
@@ -67,7 +67,7 @@ void PathDecomposit::all_train()
 {
     std::unique_ptr<RTDP> pursurer_agent = decompos_paths();
     auto sim  = Emulator(pursurer_agent.get(),evader, std::move(State<>(s_state)),conf);
-    sim.main_loop(15e6); //40000000
+    sim.main_loop(2e6); //40000000
 
 }
 
@@ -85,7 +85,7 @@ void PathDecomposit::single_train()
         std::unique_ptr<RTDP> pursurer_agent = decompos_paths();
         //conf.h=hurstic;
         auto sim  = Emulator(pursurer_agent.get(),evader, std::move(State<>(s_state)),conf);
-        sim.main_loop(10001); //50000
+        sim.main_loop(3e6); //50000
         std::unique_ptr<Table> Q = pursurer_agent->get_Q_tabel();
         cout<<"Q:"<<Q->size()<<endl;
         l_Q_table.push_back(std::move(Q));
@@ -94,6 +94,7 @@ void PathDecomposit::single_train()
         map_dico.insert(map_s.begin(),map_s.end());
         i++;
     }
+
 
     update_evader_paths(std::move(all_paths_),std::move(prob_all_paths_));
     FinderH h_con = FinderH(conf.maxD,conf.h,this->evader->list_only_pos(),evader->get_copy_probabilities(),evader->get_paths_names(),std::move(map_dico));
@@ -109,26 +110,15 @@ void PathDecomposit::single_train()
     cout<<"big>>"<<big->size()<<endl;
 
     //conf.levelz=1;
+    if (is_save) QTabel_CSV::state_map_to_csv(h_con.get_map_dico(),conf.home);
+    if (is_save) QTabel_CSV::Q_to_csv(big.get(),conf.home);
+
 
     std::unique_ptr<RTDP> pursurer_agent = decompos_paths();
     pursurer_agent->set_Q_table(std::move(big));
     auto sim  = Emulator(pursurer_agent.get(),evader, std::move(State<>(s_state)),conf);
-    sim.main_loop(10e6);
-//    auto ctr_=0;
-//    auto x = pursurer_agent->retrun_list_h();
-//    auto map_dicto  = h_con.rtrun_dico_map();
-//    for(const auto& item_state : x)
-//    {
-//        auto h_s = item_state.getHashValueGR();
-//        if(auto pos = map_dicto.find(h_s);pos==map_dicto.end())
-//        {
-//            cout<<"S:"<<item_state.to_string_state()<<"\t h()="<<h_s<<endl;
-//        }
-//        else{
-//            ctr_++;
-//        }
-//    }
-//    cout<<"ctr_: "<<ctr_<<endl;
+    sim.main_loop(3e6);
+
 }
 
 

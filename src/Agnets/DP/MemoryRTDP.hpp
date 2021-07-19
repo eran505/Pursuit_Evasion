@@ -10,7 +10,7 @@
 #include "../TrajectoriesTree.hpp"
 #include "Heuristicer.hpp"
 
-typedef float Cell;
+typedef double Cell;
 typedef std::vector<Cell> Row;
 typedef u_int64_t Entry;
 typedef std::unordered_map<Entry ,Row> Table;

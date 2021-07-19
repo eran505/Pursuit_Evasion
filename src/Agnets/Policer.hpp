@@ -35,7 +35,7 @@ public:
         GR.load_agent_paths(pathz,std::move(prob_vec),names);
     }
 
-    void update_state(State<> &s)
+    void update_state(State<> &s) override
     {
 //        if (s.to_string_state()=="32_A_(80, 153, 2, )_(1, 2, 0, )|D_(150, 132, 0, )_(0, 1, 0, )|_{ 24}_N_(52, 121, 0, )_16")
 //            cout<<endl;
@@ -48,14 +48,14 @@ public:
         s.budgets = l;
 
     }
-    void reset_state(State<> &s)
+    void reset_state(State<> &s) override
     {
         //const Point& evader_position = s.get_position_ref(e);
         GR.reset_ptr();
         //NodeG* ptr =  GR.get_curr_ptr();
         s.budgets = GR.get_list_cur();
     }
-    void search_state(State<> &s)
+    void search_state(State<> &s) override
     {
         const Point& evader_position = s.get_position_ref(e);
         GR.search_tree_with_jumps(evader_position,s.jump,s.budgets.ptr);

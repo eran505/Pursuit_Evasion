@@ -27,7 +27,7 @@ class Logger{
     u_int64_t counter=0;
     std::string home;
     Saver<string> file_manger;
-    u_int32_t log_every=10000;
+    u_int32_t log_every=1000;
     bool done = false;
 public:
     enum info_val {ITER,COLL,GOAL,WALL};

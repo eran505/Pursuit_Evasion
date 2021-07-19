@@ -6,7 +6,7 @@
 #define PE_HEURISTICER_HPP
 #include "States/State.hpp"
 
-typedef float Cell;
+typedef double Cell;
 typedef u_int64_t Entry;
 
 class Heuristicer{
@@ -31,23 +31,13 @@ public:
         }
         if (h==1)
         {
-            H = [this](const State<> &ptrS) { return this->trajectories_tree.get_min_steps_all_end(ptrS);};
-            H_plan=[this](const State<> &ptrS,int index_plan) { return this->trajectories_tree.H_plan(ptrS,index_plan);};
+            H = [this](const State<> &ptrS) { return this->trajectories_tree.all_future_distances_min(ptrS,true);};
+            H_plan=[this](const State<> &ptrS,int index_plan) { return this->trajectories_tree.H_planV2(ptrS,index_plan,true);};
         }
         if (h==2)
         {
-            H = [this](const State<> &ptrS) { return this->trajectories_tree.get_min_steps_rel_end(ptrS);};
-            H_plan=[this](const State<> &ptrS,int index_plan) { return this->trajectories_tree.H_plan(ptrS,index_plan);};
-        }
-        if (h==3)
-        {
-            H = [this](const State<> &ptrS) { return this->trajectories_tree.all_future_distances(ptrS);};
-            H_plan=[this](const State<> &ptrS,int index_plan) { return this->trajectories_tree.H_planV2(ptrS,index_plan);};
-        }
-        if (h==4)
-        {
-            H = [this](const State<> &ptrS) { return this->trajectories_tree.all_future_distances(ptrS,false);};
-            H_plan=[this](const State<> &ptrS,int index_plan) { return this->trajectories_tree.H_planV2(ptrS,index_plan,false);};
+            H = [this](const State<> &ptrS) { return this->trajectories_tree.all_future_distances_expection(ptrS, true);};
+            H_plan=[this](const State<> &ptrS,int index_plan) { return this->trajectories_tree.H_planV2(ptrS,index_plan,true);};
         }
 
 
@@ -66,7 +56,7 @@ public:
 
 std::vector<Cell> Heuristicer::heuristic(const State<>& s)const
 {
-
+    //cout<<s.to_string_state()<<endl;
     vector<State<>> vec_q;
     auto oldState = State(s);
     auto row = std::vector<Cell>(27);
@@ -78,6 +68,7 @@ std::vector<Cell> Heuristicer::heuristic(const State<>& s)const
 
         double val;
         bool isWall = oldState.applyAction(Pid,actionCur,max_speed_P,oldState.jump);
+        //cout<<"oldState:\t"<<oldState.to_string_state()<<endl;
 
         if (isWall)
             val = (this->R.WallReward)*std::pow(R.discountF,oldState.jump);

@@ -5,7 +5,7 @@
 #ifndef PE_TABLEAGG_H
 #define PE_TABLEAGG_H
 #include "Agnets/DP/Heuristicer.hpp"
-typedef float Cell;
+typedef double Cell;
 typedef std::unordered_map<u_int64_t,std::vector<Cell>> Qtable_;
 class FinderH{
 public:
@@ -69,6 +69,7 @@ public:
     {
         return look_up_state.at(state_id_) ;
     }
+    std::unordered_map<u_int64_t ,State<>>&& get_map_dico(){return std::move(look_up_state);}
 
 };
 

@@ -55,21 +55,21 @@ public:
     }
     ~Saver()
     {
-        if(body.empty()) return;
-        int i=0;
-        if(ctr_indx<this->MAX_buffer/3){
-            i=MAX_buffer/3;
-            ctr_indx=MAX_buffer;
-        }
-        for(auto &item:body)
-        {
-            if(i>=ctr_indx)
-                break;
-            writeData(item);
-            csver<<endrow;
-            i++;
-        }
-        csver.flush();
+//        if(body.empty()) return;
+//        int i=0;
+//        if(ctr_indx<this->MAX_buffer/3){
+//            i=MAX_buffer/3;
+//            ctr_indx=MAX_buffer;
+//        }
+//        for(auto &item:body)
+//        {
+//            if(i>=ctr_indx)
+//                break;
+//            writeData(item);
+//            csver<<endrow;
+//            i++;
+//        }
+//        csver.flush();
     }
     void set_header_vec(const vector<H> &vec)
     {

@@ -67,20 +67,7 @@ public:
     {
         const Point& evader_position = s.get_position_ref(e);
         const Point& p_pos = s.get_position_ref(this->p);
-        auto begin_look_up = s.state_time+s.jump;
-        u_int32_t min_step_val=100000;
-        for (int index_path : names) {
-            auto idx = name_to_idx(index_path);
-            if (auto dist= get_min_step_diff_last_orgin(p_pos,idx,begin_look_up);dist<min_step_val)
-                min_step_val = dist;
-        }
-        return this->R.CollReward*std::pow(R.discountF,min_step_val);
-    }
-    double get_min_steps_rel_end(const State<> &s)const
-    {
 
-        const Point& evader_position = s.get_position_ref(e);
-        const Point& p_pos = s.get_position_ref(this->p);
         auto begin_look_up = s.state_time+s.jump;
         auto vec = s.budgets.get_plans();
         u_int32_t min_step_val=100000;
@@ -89,15 +76,64 @@ public:
             if (auto dist= get_min_step_diff_last_orgin(p_pos,idx,begin_look_up);dist<min_step_val)
                 min_step_val = dist;
         }
-        auto h = this->R.CollReward*std::pow(R.discountF,min_step_val);;
+        auto h = this->R.CollReward*std::pow(R.discountF,min_step_val+s.state_time);
         return h;
     }
 
-    double all_future_distances(const State<>& s,bool is_optim=true)const
+    double get_min_steps_all_endV2(const State<> &s)
     {
+        const Point& evader_position = s.get_position_ref(e);
         const Point& p_pos = s.get_position_ref(this->p);
         auto begin_look_up = s.state_time+s.jump;
-        //auto vec = dict_mapper_pathz.at(s.get_position_ref(e).expHash());
+        u_int32_t min_step_val=1000000;
+        for (int index_path : names) {
+            auto idx = name_to_idx(index_path);
+            if (auto dist= get_min_step_diff_last_orgin(p_pos,idx,begin_look_up);dist<min_step_val)
+                min_step_val = dist;
+        }
+        return this->R.CollReward*std::pow(R.discountF,min_step_val);
+    }
+
+
+
+    double get_min_steps_rel_end(const State<> &s)const
+    {
+
+        const Point& evader_position = s.get_position_ref(e);
+        const Point& p_pos = s.get_position_ref(this->p);
+
+        auto begin_look_up = s.state_time+s.jump;
+        auto vec = s.budgets.get_plans();
+        u_int32_t min_step_val=100000;
+        for (int index_path : vec) {
+            auto idx = name_to_idx(index_path);
+            if (auto dist= get_min_step_diff_last_orgin(p_pos,idx,begin_look_up);dist<min_step_val)
+                min_step_val = dist;
+        }
+        auto h = this->R.CollReward*std::pow(R.discountF,min_step_val+begin_look_up);
+        return h;
+    }
+
+    double all_future_distances_min(const State<>& s,bool is_optim=true)const
+    {
+        const Point& p_pos = s.get_position_ref(this->p);
+        auto begin_look_up = s.state_time;
+        auto vec = s.budgets.get_plans();
+        std::vector<u_int32_t>D(vec.size());
+        double result=0.0;
+        for(int k=0;k<vec.size();k++)
+        {
+            u_int index_plan = name_to_idx(vec[k]);
+            D[k]=get_min_step_diffV2(p_pos,index_plan,begin_look_up,is_optim);
+        }
+        return this->R.CollReward*std::pow(R.discountF,*std::min_element(D.begin(),D.end()));;
+    }
+
+    double all_future_distances_expection(const State<>& s,bool is_optim=true)const
+    {
+        const Point& p_pos = s.get_position_ref(this->p);
+        auto begin_look_up = s.state_time;
+        //begin_look_up = s.state_time;
         auto vec = s.budgets.get_plans();
         std::vector<u_int32_t>D(vec.size());
         double result=0.0;
@@ -120,15 +156,16 @@ public:
     double H_planV2(const State<>& s,int plan_id,bool is_optim=true)const
     {
         const Point& p_pos = s.get_position_ref(this->p);
-        auto begin_look_up = s.state_time+s.jump;
+        auto begin_look_up = s.state_time;
         auto step_to_coll=get_min_step_diffV2(p_pos,plan_id,begin_look_up,is_optim);
         double result =this->R.CollReward*std::pow(R.discountF,step_to_coll);
         return result;
     }
     double H_plan(const State<>& s,int plan_id)const
     {
+        int t=0;
         const Point& p_pos = s.get_position_ref(this->p);
-        auto begin_look_up = s.state_time+s.jump;
+        auto begin_look_up = s.state_time;
         auto step_to_coll=get_min_step_diff_last_orgin(p_pos,plan_id,begin_look_up);
         double result =this->R.CollReward*std::pow(R.discountF,step_to_coll);
         return result;
@@ -140,24 +177,24 @@ private:
     {
         start_look = std::min(size_t(start_look),all_paths[index_path].size()-1);
         std::vector<u_int32_t > max_distance;
+        int min_d = all_paths[index_path].size();
         for(int i=start_look;i<all_paths[index_path].size();i++)
         {
             auto res = Point::distance_min_step(p_loc,all_paths[index_path][i]);
+            int t_e = int(i-start_look);
             if (optimazer) {
-                if (res <= i)
-                    max_distance.push_back(std::max(res, int(i-start_look)));
+                if (res <= t_e)
+                {
+                    int m = std::max(res,t_e);
+                    if(min_d>m) min_d = m;
+                }
             }else{
-                max_distance.push_back(std::max(res, int(i-start_look)));
+                int m = std::max(res,t_e);
+                if(min_d>m) min_d = m;
             }
         }
-        if(max_distance.empty())
-        {
-            //cout<<start_look<<endl;
-            //cout<<all_paths[index_path].size()<<endl;
-            return all_paths[index_path].size()+1;
-        }
-
-        return *std::min_element(max_distance.begin(),max_distance.end());
+        assert(min_d>=0);
+        return min_d;
     }
 
     u_int32_t get_min_step_diff_last_orgin(const Point& p_pos,size_t index_path, u_int start_look)const

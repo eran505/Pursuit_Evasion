@@ -45,7 +45,6 @@ public:
     void update(const Point& a, State<>&& s,Entry id);
     [[nodiscard]] int get_max_speed() const{return max_speed;}
     void update_state(State<> &s);
-
     void set_Q_table(std::unique_ptr<Table>&& t){this->memo_rtdp->set_Q_table(std::move(t));}
 
     //std::vector<State<>> retrun_list_h(){return this->memo_rtdp->retrun_list_h();}
@@ -73,6 +72,7 @@ RTDP::RTDP(const StaticPolicy *evader,const configGame& conf):
         else policer = std::make_unique<Policer>();
 
         memo_rtdp->set_print_mode(conf.levelz);
+        evaluator.set_option_mode(conf.options);
     }
 
 
