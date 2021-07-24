@@ -135,7 +135,7 @@ void MemoryRtdp::set_value_matrix(Entry entry, size_t second_entry, Cell val) {
     auto old = vec[second_entry];
 //    if(!(old>=val))
 //        cout<<old<<":->"<<val<<endl;
-//    assert(old>=val);
+    //assert(old>=val);
 
 
     vec[second_entry]=val;

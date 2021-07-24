@@ -69,6 +69,8 @@ void PathDecomposit::all_train()
     auto sim  = Emulator(pursurer_agent.get(),evader, std::move(State<>(s_state)),conf);
     sim.main_loop(2e6); //40000000
 
+    if(this->is_save)  QTabel_CSV::Q_to_csv(pursurer_agent->get_Q_tabel().get(),conf.home,"all_");
+    if(this->is_save) QTabel_CSV::state_map_to_csv(pursurer_agent->get_map_state(),conf.home,"all_");
 }
 
 void PathDecomposit::single_train()
@@ -110,8 +112,8 @@ void PathDecomposit::single_train()
     cout<<"big>>"<<big->size()<<endl;
 
     //conf.levelz=1;
-    if (is_save) QTabel_CSV::state_map_to_csv(h_con.get_map_dico(),conf.home);
-    if (is_save) QTabel_CSV::Q_to_csv(big.get(),conf.home);
+    if (is_save) QTabel_CSV::state_map_to_csv(h_con.get_map_dico(),conf.home,"de_");
+    if (is_save) QTabel_CSV::Q_to_csv(big.get(),conf.home,"de_");
 
 
     std::unique_ptr<RTDP> pursurer_agent = decompos_paths();

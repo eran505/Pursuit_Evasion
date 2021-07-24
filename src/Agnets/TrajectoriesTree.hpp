@@ -4,7 +4,7 @@
 
 #ifndef PE_TRAJECTORIESTREE_HPP
 #define PE_TRAJECTORIESTREE_HPP
-#define MAX_INT 100000
+#define MAX_STEP 100000
 #include "GoalRec/PathRec.hpp"
 #include "States/State.hpp"
 
@@ -120,7 +120,6 @@ public:
         auto begin_look_up = s.state_time;
         auto vec = s.budgets.get_plans();
         std::vector<u_int32_t>D(vec.size());
-        double result=0.0;
         for(int k=0;k<vec.size();k++)
         {
             u_int index_plan = name_to_idx(vec[k]);
@@ -135,22 +134,25 @@ public:
         auto begin_look_up = s.state_time;
         //begin_look_up = s.state_time;
         auto vec = s.budgets.get_plans();
-        std::vector<u_int32_t>D(vec.size());
+        std::vector<double>D(vec.size());
         double result=0.0;
         double sum_all_prob = 0.0;
         for(int k=0;k<vec.size();k++)
         {
             u_int index_plan = name_to_idx(vec[k]);
-            D[k]=get_min_step_diffV2(p_pos,index_plan,begin_look_up,is_optim);
+            auto steps =get_min_step_diffV2(p_pos,index_plan,begin_look_up,is_optim);
+            if(steps==MAX_STEP) D[k] = 0;
+            else D[k]= this->R.CollReward*std::pow(R.discountF,steps);
             sum_all_prob+=prior_p_paths[index_plan];
         }
-
         for (int i = 0; i < D.size(); ++i) {
             u_int index_plan = name_to_idx(vec[i]);
-            result+=this->R.CollReward*std::pow(R.discountF,D[i])*(prior_p_paths[index_plan]/sum_all_prob);
+            result+=D[i]*(prior_p_paths[index_plan]/sum_all_prob);
         }
+        cout<<result<<endl;
         return result;
     }
+
 
 
     double H_planV2(const State<>& s,int plan_id,bool is_optim=true)const
@@ -175,25 +177,21 @@ private:
 
     u_int32_t get_min_step_diffV2(const Point& p_loc,size_t index_path, u_int start_look,bool optimazer=true)const
     {
-        start_look = std::min(size_t(start_look),all_paths[index_path].size()-1);
+        start_look = std::min(size_t(start_look),all_paths[index_path].size());
         std::vector<u_int32_t > max_distance;
-        int min_d = all_paths[index_path].size();
-        for(int i=start_look;i<all_paths[index_path].size();i++)
+        int min_d = MAX_STEP;
+        for(int i=start_look;i<all_paths[index_path].size()-1;i++)
         {
             auto res = Point::distance_min_step(p_loc,all_paths[index_path][i]);
             int t_e = int(i-start_look);
-            if (optimazer) {
+            if (optimazer)
+            {
                 if (res <= t_e)
                 {
-                    int m = std::max(res,t_e);
-                    if(min_d>m) min_d = m;
+                    if(min_d>t_e) min_d = t_e;
                 }
-            }else{
-                int m = std::max(res,t_e);
-                if(min_d>m) min_d = m;
             }
         }
-        assert(min_d>=0);
         return min_d;
     }
 

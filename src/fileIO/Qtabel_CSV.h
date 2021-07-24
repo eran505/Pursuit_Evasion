@@ -12,14 +12,14 @@
 
 namespace QTabel_CSV{
 
-    void Q_to_csv(Table *Q,const string& home)
+    void Q_to_csv(Table *Q,const string& home,string&& prefix)
     {
 
         auto d = Point::getVectorActionUniqie();
-        Saver<string> file_manger(home+LOG_DIR+"Q.csv",10);
-        file_manger.inset_one_item("ID");
-        for (int i = 0; i < 27; ++i) file_manger.inset_one_item(std::to_string(d[i][0])+"|"+std::to_string(d[i][1])+"|"+std::to_string(d[i][2]));
-        file_manger.inset_endLine();
+        Saver<string> file_manger(home+LOG_DIR+prefix+"Q.csv",10);
+//        file_manger.inset_one_item("ID");
+//        for (int i = 0; i < 27; ++i) file_manger.inset_one_item(std::to_string(d[i][0])+"|"+std::to_string(d[i][1])+"|"+std::to_string(d[i][2]));
+//        file_manger.inset_endLine();
         file_manger.inset_one_item("ID");
         for (int i = 0; i < 27; ++i) file_manger.inset_one_item(std::to_string(i));
         file_manger.inset_endLine();
@@ -33,11 +33,11 @@ namespace QTabel_CSV{
         }
     }
 
-    void state_map_to_csv(const std::unordered_map<u_int64_t,State<>> &map,const string& home)
+    void state_map_to_csv(const std::unordered_map<u_int64_t,State<>> &map,const string& home,string &&prefix)
     {
 
         auto d = Point::getVectorActionUniqie();
-        Saver<string> file_manger(home+LOG_DIR+"MAP.csv",10);
+        Saver<string> file_manger(home+LOG_DIR+prefix+"MAP.csv",10);
         file_manger.inset_one_item("ID");
         file_manger.inset_one_item("State");
         file_manger.inset_endLine();
