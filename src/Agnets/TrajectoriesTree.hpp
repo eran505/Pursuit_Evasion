@@ -149,7 +149,7 @@ public:
             u_int index_plan = name_to_idx(vec[i]);
             result+=D[i]*(prior_p_paths[index_plan]/sum_all_prob);
         }
-        cout<<result<<endl;
+        //cout<<result<<endl;
         return result;
     }
 

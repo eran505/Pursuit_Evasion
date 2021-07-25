@@ -112,7 +112,12 @@ void MemoryRtdp::Q_table_add_row(const State<> &s,Entry key_entry) {
 //    }else{
 //        tmp_var = heuristicer.heuristic(s);
 //    }
-
+    auto x = heuristicer.heuristic(s);
+    cout<<s.to_string_state()<<" : ";
+    for (int i = 0; i < x.size(); ++i) {
+        cout<<i<<":"<<x[i]<<" ";
+    }
+    cout<<endl;
 
     Qtable->try_emplace(key_entry,heuristicer.heuristic(s));
     debug_map.try_emplace(key_entry,s);

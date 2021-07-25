@@ -112,8 +112,8 @@ void PathDecomposit::single_train()
     cout<<"big>>"<<big->size()<<endl;
 
     //conf.levelz=1;
-    if (is_save) QTabel_CSV::state_map_to_csv(h_con.get_map_dico(),conf.home,"de_");
-    if (is_save) QTabel_CSV::Q_to_csv(big.get(),conf.home,"de_");
+    if (is_save) QTabel_CSV::state_map_to_csv(h_con.get_map_dico(),conf.home,"all_");
+    if (is_save) QTabel_CSV::Q_to_csv(big.get(),conf.home,"all_");
 
 
     std::unique_ptr<RTDP> pursurer_agent = decompos_paths();

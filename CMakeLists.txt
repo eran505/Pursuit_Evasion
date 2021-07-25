@@ -5,9 +5,9 @@ set(CMAKE_CXX_STANDARD 20)
 include_directories(src)
 #include_directories(Tests)
 
-set(CMAKE_CXX_FLAGS_DEFAULT "-O3 -g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-set(CMAKE_CXX_FLAGS_DEBUG  "-O3 -g")
+#set(CMAKE_CXX_FLAGS_DEFAULT "-O3 -g")
+#set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+#set(CMAKE_CXX_FLAGS_DEBUG  "-O3 -g")
 
 #set(CMAKE_CXX_FLAGS -DDEBUG)
 #set(CMAKE_CXX_FLAGS "-Wall " )

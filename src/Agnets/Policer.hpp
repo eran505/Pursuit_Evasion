@@ -60,7 +60,7 @@ public:
         const Point& evader_position = s.get_position_ref(e);
         GR.search_tree_with_jumps(evader_position,s.jump,s.budgets.ptr);
         s.budgets=GR.get_list_cur();
-        if (s.budgets.ptr.front()->pos!=s.get_position_ref(agentEnum::A)){
+        if (!(s.budgets.ptr.front()->pos==s.get_position_ref(agentEnum::A))){
             cout<<s.to_string_state()<<endl;
             assert(false);
         }
