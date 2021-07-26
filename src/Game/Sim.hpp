@@ -72,7 +72,7 @@ public:
         for (int i = 0; i < num_of_games; ++i) {
             game_sim();
             if (this->logger.get_done())done++;
-            if(done==1)break;
+            if(done==4)break;
         }
     }
     bool check_condition()

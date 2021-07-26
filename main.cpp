@@ -13,14 +13,16 @@ void game_start(configGame &conf);
 
 int main() {
 
-    int seed=4;
+    int seed=11111;
+
     std::cout << "Hello, World!" << std::endl;
     std::string csv_path= getProjectDir() + "/csv/con2.csv";
     cout<<"csv_path: "<<csv_path<<endl;
     CSVReader reader(csv_path,',');
     vector<vector<string>> rowsCsv = reader.getDataCSV();
     auto root_dir = getRootDir();
-
+    // rm all files in log_dir
+    OS::deleteDirectoryContents(root_dir+LOG_DIR);
     //log the con.csv file
     Logger::copy_file(root_dir+LOG_DIR,csv_path);
     Logger loggerTime(root_dir,"time");

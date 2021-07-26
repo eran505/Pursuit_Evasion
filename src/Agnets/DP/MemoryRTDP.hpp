@@ -4,7 +4,7 @@
 
 #ifndef PE_MEMORYRTDP_HPP
 #define PE_MEMORYRTDP_HPP
-
+# define EP 0.000001
 #include "States/State.hpp"
 #include "Rewards.hpp"
 #include "../TrajectoriesTree.hpp"
@@ -69,7 +69,7 @@ public:
 std::pair<Point, u_int64_t> MemoryRtdp::get_argMAx(const State<> &s) {
     auto entry_id = this->get_entry(s);
     const Row& row = this->get_row_qTable(s,entry_id);
-    auto index = arg_max_at_shuffle<Row>(row,rand.generator);
+    auto index = arg_max_at_shuffle<Row>(row,rand.get_double());
     Point action = id_to_point[index];
     return std::pair<Point, u_int64_t>(std::move(action),entry_id);
 }
@@ -112,12 +112,12 @@ void MemoryRtdp::Q_table_add_row(const State<> &s,Entry key_entry) {
 //    }else{
 //        tmp_var = heuristicer.heuristic(s);
 //    }
-    auto x = heuristicer.heuristic(s);
-    cout<<s.to_string_state()<<" : ";
-    for (int i = 0; i < x.size(); ++i) {
-        cout<<i<<":"<<x[i]<<" ";
-    }
-    cout<<endl;
+//    auto x = heuristicer.heuristic(s);
+//    cout<<s.to_string_state()<<" : ";
+//    for (int i = 0; i < x.size(); ++i) {
+//        cout<<i<<":"<<x[i]<<" ";
+//    }
+//    cout<<endl;
 
     Qtable->try_emplace(key_entry,heuristicer.heuristic(s));
     debug_map.try_emplace(key_entry,s);
@@ -136,12 +136,13 @@ std::unique_ptr<Table> MemoryRtdp::get_Q_table(){
 
 
 void MemoryRtdp::set_value_matrix(Entry entry, size_t second_entry, Cell val) {
+
     auto& vec = this->Qtable->at(entry);
     auto old = vec[second_entry];
-//    if(!(old>=val))
-//        cout<<old<<":->"<<val<<endl;
-    //assert(old>=val);
-
+    if(old+EP<val) {
+        cout << old << ":->" << val << endl;
+        //assert(false);
+    }
 
     vec[second_entry]=val;
     //this->Qtable->operator[](entryState).operator[](action.hashMeAction(Point::actionMax))=val;

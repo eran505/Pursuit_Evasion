@@ -60,7 +60,7 @@ private:
 
 RTDP::RTDP(const StaticPolicy *evader,const configGame& conf):
 
-    memo_rtdp(std::make_shared<MemoryRtdp>(conf._seed,evader->list_only_pos(),evader->get_copy_probabilities(),evader->get_paths_names(), conf.mode,conf.options,conf.h,conf.maxA)),
+    memo_rtdp(std::make_shared<MemoryRtdp>(conf._seed,evader->list_only_pos(),evader->get_copy_probabilities(),evader->get_paths_names(), conf.mode,conf.options,conf.h,conf.maxD)),
     stack(),
     action_expend(evader),
     evaluator(memo_rtdp),

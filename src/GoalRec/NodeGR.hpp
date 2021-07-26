@@ -68,11 +68,12 @@ public:
         string str;
         for(const auto& item: goal_list)
         {
-            str.append("{");
-            std::for_each(item.second.begin(),item.second.end(),[&str](u_int16_t x){
-                str.append(" "+std::to_string(x));
+            str.append("[");
+            std::for_each(item.second.begin(),item.second.end()-1,[&str](u_int16_t x){
+                str.append(std::to_string(x)+",");
             });
-            str.append("}");
+            str.append(std::to_string(item.second.back()));
+            str.append("]");
         }
 
         str.append("_N_");

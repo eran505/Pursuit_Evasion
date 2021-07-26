@@ -52,5 +52,11 @@ namespace QTabel_CSV{
 
 }
 
-
+namespace OS{
+    void deleteDirectoryContents(const std::string& dir_path)
+    {
+        for (const auto& entry : std::filesystem::directory_iterator(dir_path))
+            std::filesystem::remove_all(entry.path());
+    }
+}
 #endif //PE_QTABEL_CSV_H

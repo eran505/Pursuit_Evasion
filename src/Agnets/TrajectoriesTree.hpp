@@ -17,7 +17,7 @@ class TrajectoriesTree{
     agentEnum p=agentEnum::D;
     std::vector<std::vector<Point>> all_paths;
     std::vector<double> prior_p_paths;
-    [[maybe_unused]] std::vector<std::unique_ptr<NodeG>> tmp_lst;
+    std::vector<std::unique_ptr<NodeG>> tmp_lst;
     std::unique_ptr<std::unordered_map<u_int64_t,std::vector<int16_t>>>  dict_loc_time= nullptr;
     vector<u_int16_t > names;
 public:
@@ -116,16 +116,20 @@ public:
 
     double all_future_distances_min(const State<>& s,bool is_optim=true)const
     {
+
         const Point& p_pos = s.get_position_ref(this->p);
         auto begin_look_up = s.state_time;
         auto vec = s.budgets.get_plans();
-        std::vector<u_int32_t>D(vec.size());
+        std::vector<double>D(vec.size());
+        double result=0.0;
         for(int k=0;k<vec.size();k++)
         {
             u_int index_plan = name_to_idx(vec[k]);
-            D[k]=get_min_step_diffV2(p_pos,index_plan,begin_look_up,is_optim);
+            auto steps =get_min_step_diffV2(p_pos,index_plan,begin_look_up,is_optim);
+            if(steps==MAX_STEP) D[k] = 0;
+            else D[k]= this->R.CollReward*std::pow(R.discountF,steps);
         }
-        return this->R.CollReward*std::pow(R.discountF,*std::min_element(D.begin(),D.end()));;
+        return *std::max_element(D.begin(),D.end());
     }
 
     double all_future_distances_expection(const State<>& s,bool is_optim=true)const

@@ -33,7 +33,6 @@ public:
 
             auto state_new_s = heuristic.infer_state(s);
             u_int64_t new_s_hash = state_new_s.getHashValueGR();
-
             if(new_s_hash ==entry.first)
                 continue;
 //            cout<<"[OLD] "<<s.to_string_state()<<endl;
@@ -44,6 +43,7 @@ public:
             look_up_state.try_emplace(new_s_hash,std::move(state_new_s));
         }
         l_tabel->insert(t.begin(),t.end());
+
     }
     bool is_one_plan(u_int64_t state_id_)const
     {
@@ -58,10 +58,16 @@ public:
     {
         vector<u_int16_t> l;
         l.reserve(1);
-        for (auto& item: look_up_state.at(state_id_).budgets.ptr)
-            for(auto &pair_item_goal:item->goal_list)
-                for(auto& planI : pair_item_goal.second)
-                    l.push_back(planI);
+        if (auto pos_iter = look_up_state.find(state_id_);pos_iter==look_up_state.end())
+            assert(false);
+        else{
+            auto s = pos_iter->second;
+            for (auto& item: s.budgets.ptr)
+                for(auto &pair_item_goal:item->goal_list)
+                    for(auto& planI : pair_item_goal.second)
+                        l.push_back(planI);
+        }
+
         return l;
     }
 
@@ -152,7 +158,8 @@ public:
         vector<u_int16_t> plansIds = h_con.get_plans(keyState);
         //Cell max_item=1000000;
         State<> s = h_con.get_state_from_id(keyState);
-
+        if (keyState==5662437437142756322)
+            return;
         if(is_one_plan and is_plan_rec)
         {
             auto pos = QVec[plansIds.front()]->find(keyState);

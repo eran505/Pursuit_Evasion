@@ -67,12 +67,14 @@ public:
     [[nodiscard]] std::string to_str() const {
         std::string str_to_string;
         str_to_string+="(";
-        for ( int i = 0; i < D; i++) {
+        for ( int i = 0; i < D-1; i++) {
             str_to_string += std::to_string((this->array[i]));
             str_to_string += ", ";
         }
         //str_to_string+= std::to_string(*(array + this->capacity-1));
+        str_to_string += std::to_string((this->array[D-1]));
         str_to_string+=')';
+
         return str_to_string;
     }
     [[nodiscard]] string to_hash_str() const {
@@ -509,10 +511,9 @@ public:
     }
 
     template< typename Arr>
-    u_int32_t arg_max_at_shuffle(const Arr &arr, std::default_random_engine generator){
+    u_int32_t arg_max_at_shuffle(const Arr &arr, double seed){
         vector<u_int32_t> listIdxs;
-        double max = -1;
-        max = *std::max_element(arr.begin(), arr.end());
+        double max = *std::max_element(arr.begin(), arr.end());
         listIdxs.reserve(1);
         for (int i = 0; i < arr.size(); ++i) {
             if (arr.operator[](i)==max)
@@ -520,11 +521,12 @@ public:
         }
         if (listIdxs.size()==1)
             return listIdxs.front();
-        std::shuffle(listIdxs.begin(),listIdxs.end(),generator);
-        return listIdxs.front();
+        auto idx = std::min(int(seed*listIdxs.size()+1),int(listIdxs.size()-1));
+        //std::shuffle(listIdxs.begin(),listIdxs.end(),generator);
+        return listIdxs[idx];
     }
 
-    inline double fastPow(double a, double b) {
+[[maybe_unused]] inline double fastPow(double a, double b) {
         union {
             double d;
             int x[2];

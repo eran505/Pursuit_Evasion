@@ -78,6 +78,8 @@ public:
                     auto seq = make_state_seq(item_end_point.first, item_start_point);
                     double w = item_start_point.weightedVal * item_end_point.second*(1.0/num_path);
                     std::vector<StatePoint> path = add_path_to_dictV2(seq);
+                    if( is_duplicated(path,l) )
+                        continue;
                     lp.push_back(w);
                     l.push_back(path);
                     cout<<"path #"<<num++<<endl;
@@ -87,6 +89,22 @@ public:
         return {l,lp};
     }
 private:
+
+    static bool is_duplicated(const std::vector<StatePoint>& l_path,const std::vector<std::vector<StatePoint>> &l)
+    {
+        for (auto &item_path:l)
+        {
+            auto min_len = std::min(item_path.size(),l_path.size())-1;
+            int ctr=0;
+            for (int i = 0; i < min_len; ++i) {
+                if(l_path[i].pos!=item_path[i].pos) break;
+                ctr++;
+            }
+            if(ctr==min_len) return true;
+        }
+        return false;
+    }
+
     static vector<StatePoint> make_state_seq(const std::vector<Point> &l,const weightedPosition &item)
     {
         std::vector<StatePoint> seq;
@@ -171,7 +189,7 @@ private:
     std::vector<StatePoint> add_middle_point_at_random(const std::vector<StatePoint> &A_list)
     {
         //return {*A_list.begin(),get_random_pointV1(0.6,5),A_list.back()};
-        return {*A_list.begin(),get_random_pointV1(0.25,3),get_random_pointV1(0.75,4),A_list.back()};
+        return {*A_list.begin(),get_random_pointV1(0.25,9),get_random_pointV1(0.75,9),A_list.back()};
         //return {*A_list.begin(),get_random_point(0.4),A_list.back()};
     }
     void pathsToDict(const vector<AStar::StatePoint>& allPath) {

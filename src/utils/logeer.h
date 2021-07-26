@@ -42,7 +42,8 @@ public:
         file_manger.set_header_vec({"ID","Time"});
     }
     bool get_done()const{return done;};
-    bool set_done(bool bol){done=bol;};
+
+    //[[maybe_unused]] void set_done(bool bol){done=bol;};
 public:
     void log_scalar_increment(info_val val){
         info[val]++;
