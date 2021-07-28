@@ -83,8 +83,11 @@ public:
                     lp.push_back(w);
                     l.push_back(path);
                     cout<<"path #"<<num++<<endl;
+
                 }
+                break;
             }
+
         }
         return {l,lp};
     }
@@ -189,7 +192,7 @@ private:
     std::vector<StatePoint> add_middle_point_at_random(const std::vector<StatePoint> &A_list)
     {
         //return {*A_list.begin(),get_random_pointV1(0.6,5),A_list.back()};
-        return {*A_list.begin(),get_random_pointV1(0.3,3),get_random_pointV1(0.85,3),A_list.back()};
+        return {*A_list.begin(),get_random_pointV1(0.3,9),get_random_pointV1(0.85,9),A_list.back()};
         //return {*A_list.begin(),get_random_point(0.4),A_list.back()};
     }
     void pathsToDict(const vector<AStar::StatePoint>& allPath) {

@@ -73,17 +73,28 @@ public:
         auto s_start = State<>(s_state);
         for (int i = 0; i < num_of_games; ++i) {
             game_sim();
-            if (this->logger.get_done())
+            if (!logger.eval())
+                continue;
+            logger.is_done();
+            if (this->logger.get_done()) {
                 done++;
-            if(done==3)
-                break;
+                if (done == 5) {
+                    cout<<"in"<<endl;
+                    break;
+                }
+            }
+            else { done=0; }
+
         }
     }
     bool check_condition()
     {
         if(upper_time_bound>0)
-            if (this->s_state.state_time>=upper_time_bound)
+            if (this->s_state.state_time>=upper_time_bound) {
+                logger.log_scalar_increment(Logger::STOPED);
                 return true;
+
+            }
         const Point& pos_E = this->s_state.get_position(this->evader->get_id());
         const Point& pos_P = this->s_state.get_position(this->pursuer->get_id());
         //wall
@@ -174,7 +185,7 @@ public:
     {
         std::vector<std::vector<Point>> all_pos_paths = this->evader->list_only_pos();
         if (all_pos_paths.size()==1)
-            return all_pos_paths.front().size()-1;
+            return all_pos_paths.front().size();
         else return -1;
     }
 
