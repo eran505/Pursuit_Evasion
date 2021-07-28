@@ -97,7 +97,7 @@ private:
             auto min_len = std::min(item_path.size(),l_path.size())-1;
             int ctr=0;
             for (int i = 0; i < min_len; ++i) {
-                if(l_path[i].pos!=item_path[i].pos) break;
+                if(!(l_path[i].pos==item_path[i].pos)) break;
                 ctr++;
             }
             if(ctr==min_len) return true;
@@ -189,7 +189,7 @@ private:
     std::vector<StatePoint> add_middle_point_at_random(const std::vector<StatePoint> &A_list)
     {
         //return {*A_list.begin(),get_random_pointV1(0.6,5),A_list.back()};
-        return {*A_list.begin(),get_random_pointV1(0.25,9),get_random_pointV1(0.75,9),A_list.back()};
+        return {*A_list.begin(),get_random_pointV1(0.3,3),get_random_pointV1(0.85,3),A_list.back()};
         //return {*A_list.begin(),get_random_point(0.4),A_list.back()};
     }
     void pathsToDict(const vector<AStar::StatePoint>& allPath) {

@@ -18,6 +18,7 @@ class Emulator{
     Logger logger;
     int episodes=0;
     int done=0;
+    int upper_time_bound = -1;
     std::function<int(const Point&,const Point&)> jump_func;
 public:
 
@@ -68,16 +69,21 @@ public:
 
     void main_loop(u_int32_t num_of_games)
     {
+        upper_time_bound = check_upper_bound();
         auto s_start = State<>(s_state);
         for (int i = 0; i < num_of_games; ++i) {
             game_sim();
-            if (this->logger.get_done())done++;
-            if(done==4)break;
+            if (this->logger.get_done())
+                done++;
+            if(done==3)
+                break;
         }
     }
     bool check_condition()
     {
-
+        if(upper_time_bound>0)
+            if (this->s_state.state_time>=upper_time_bound)
+                return true;
         const Point& pos_E = this->s_state.get_position(this->evader->get_id());
         const Point& pos_P = this->s_state.get_position(this->pursuer->get_id());
         //wall
@@ -164,7 +170,13 @@ public:
     {
         s_state.jump = jump_func(s_state.get_position_ref(evader->get_id()),s_state.get_position_ref(pursuer->get_id()));
     }
-
+    int check_upper_bound()
+    {
+        std::vector<std::vector<Point>> all_pos_paths = this->evader->list_only_pos();
+        if (all_pos_paths.size()==1)
+            return all_pos_paths.front().size()-1;
+        else return -1;
+    }
 
 };
 

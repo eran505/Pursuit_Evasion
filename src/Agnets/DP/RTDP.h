@@ -50,6 +50,9 @@ public:
     //std::vector<State<>> retrun_list_h(){return this->memo_rtdp->retrun_list_h();}
 
     std::unique_ptr<Table> get_Q_tabel(){ return this->memo_rtdp->get_Q_table();}
+
+    size_t num_states_gen(){return this->memo_rtdp->get_size_state_map();}
+
     std::unordered_map<u_int64_t,State<>> get_map_state(){ return std::move(this->memo_rtdp->get_map_state());}
 private:
     Cell bellman_update(State<> &&s , const Point &a);

@@ -125,7 +125,7 @@ public:
         for(int k=0;k<vec.size();k++)
         {
             u_int index_plan = name_to_idx(vec[k]);
-            auto steps =get_min_step_diffV2(p_pos,index_plan,begin_look_up,is_optim);
+            auto steps =get_min_step_diffV2(p_pos,index_plan,begin_look_up,s.jump,is_optim);
             if(steps==MAX_STEP) D[k] = 0;
             else D[k]= this->R.CollReward*std::pow(R.discountF,steps);
         }
@@ -134,6 +134,7 @@ public:
 
     double all_future_distances_expection(const State<>& s,bool is_optim=true)const
     {
+
         const Point& p_pos = s.get_position_ref(this->p);
         auto begin_look_up = s.state_time;
         //begin_look_up = s.state_time;
@@ -144,8 +145,9 @@ public:
         for(int k=0;k<vec.size();k++)
         {
             u_int index_plan = name_to_idx(vec[k]);
-            auto steps =get_min_step_diffV2(p_pos,index_plan,begin_look_up,is_optim);
-            if(steps==MAX_STEP) D[k] = 0;
+            auto steps =get_min_step_diffV2(p_pos,index_plan,begin_look_up,s.jump,is_optim);
+            if(steps==MAX_STEP)
+                D[k] = this->R.GoalReward*std::pow(R.discountF,all_paths[index_plan].size()-begin_look_up-1);
             else D[k]= this->R.CollReward*std::pow(R.discountF,steps);
             sum_all_prob+=prior_p_paths[index_plan];
         }
@@ -163,7 +165,7 @@ public:
     {
         const Point& p_pos = s.get_position_ref(this->p);
         auto begin_look_up = s.state_time;
-        auto step_to_coll=get_min_step_diffV2(p_pos,plan_id,begin_look_up,is_optim);
+        auto step_to_coll=get_min_step_diffV2(p_pos,plan_id,begin_look_up,s.jump,is_optim);
         double result =this->R.CollReward*std::pow(R.discountF,step_to_coll);
         return result;
     }
@@ -179,23 +181,21 @@ public:
 
 private:
 
-    u_int32_t get_min_step_diffV2(const Point& p_loc,size_t index_path, u_int start_look,bool optimazer=true)const
+    u_int32_t get_min_step_diffV2(const Point& p_loc,size_t index_path, u_int start_look, u_int jump,bool optimazer=true)const
     {
         start_look = std::min(size_t(start_look),all_paths[index_path].size());
         std::vector<u_int32_t > max_distance;
         int min_d = MAX_STEP;
-        for(int i=start_look;i<all_paths[index_path].size()-1;i++)
+        for(int i = start_look+jump;i<all_paths[index_path].size()-1;++i)
         {
             auto res = Point::distance_min_step(p_loc,all_paths[index_path][i]);
             int t_e = int(i-start_look);
-            if (optimazer)
+            if (res <= t_e)
             {
-                if (res <= t_e)
-                {
-                    if(min_d>t_e) min_d = t_e;
-                }
+                if(min_d>t_e) min_d = t_e;
             }
         }
+        assert(min_d>0);
         return min_d;
     }
 

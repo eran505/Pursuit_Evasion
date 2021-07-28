@@ -25,6 +25,8 @@ class MemoryRtdp{
     Heuristicer heuristicer;
     //std::vector<State<>> tml_list_to_del;
     bool verbose=false;
+    size_t bigger=0;
+    size_t smaller=0;
 
 public:
 
@@ -48,7 +50,8 @@ public:
 
     //[[maybe_unused]] auto retrun_list_h(){return this->tml_list_to_del;}
 
-
+    size_t get_size_Q(){return this->Qtable->size();}
+    size_t get_size_state_map(){return  this->debug_map.size();}
     std::unordered_map<u_int64_t,State<>> get_map_state(){return std::move(debug_map);}
     std::pair<Point,u_int64_t> get_argMAx(const State<> &s);
     u_int64_t get_entry(const State<> &s);
@@ -139,11 +142,18 @@ void MemoryRtdp::set_value_matrix(Entry entry, size_t second_entry, Cell val) {
 
     auto& vec = this->Qtable->at(entry);
     auto old = vec[second_entry];
-    if(old+EP<val) {
-        cout << old << ":->" << val << endl;
-        //assert(false);
+//    if(old+EP<val) {
+//        cout << old << ":->" << val << endl;
+//        //assert(false);
+//    }
+    if ((old-val)<EP){
+        smaller++;
     }
+    else{
 
+            //cout<<" old:"<<old<<" val:"<<val<<" :->"<<old-val<<endl;
+            bigger++;
+        }
     vec[second_entry]=val;
     //this->Qtable->operator[](entryState).operator[](action.hashMeAction(Point::actionMax))=val;
 

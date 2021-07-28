@@ -67,7 +67,9 @@ void PathDecomposit::all_train()
 {
     std::unique_ptr<RTDP> pursurer_agent = decompos_paths();
     auto sim  = Emulator(pursurer_agent.get(),evader, std::move(State<>(s_state)),conf);
-    sim.main_loop(19e6); //40000000
+    sim.main_loop(5e6); //40000000
+
+    cout<<"Generated States: (all): "<<pursurer_agent->num_states_gen()<<endl;
 
     if(this->is_save)  QTabel_CSV::Q_to_csv(pursurer_agent->get_Q_tabel().get(),conf.home,"all_");
     if(this->is_save) QTabel_CSV::state_map_to_csv(pursurer_agent->get_map_state(),conf.home,"all_");
@@ -76,7 +78,7 @@ void PathDecomposit::all_train()
 void PathDecomposit::single_train()
 {
     std::unordered_map<u_int64_t ,State<>> map_dico;
-
+    size_t all_gen_states = 0;
     auto all_paths_ = evader->get_copy_pathz();
     auto prob_all_paths_  = evader->get_copy_probabilities();
     int i=0;
@@ -93,8 +95,9 @@ void PathDecomposit::single_train()
         l_Q_table.push_back(std::move(Q));
         auto map_s = pursurer_agent->get_map_state();
 
-        if(this->is_save) QTabel_CSV::state_map_to_csv(map_s,conf.home,std::to_string(i)+"_i_");
+        //if(this->is_save) QTabel_CSV::state_map_to_csv(map_s,conf.home,std::to_string(i)+"_i_");
         cout<<"Generated States: ("<<i<<"): "<<map_s.size()<<endl;
+        all_gen_states+=map_s.size();
         map_dico.insert(map_s.begin(),map_s.end());
         i++;
         //exit(0);
@@ -114,7 +117,7 @@ void PathDecomposit::single_train()
     std::unique_ptr<Qtable_> big = containerFixAggregator::agg_Q_tables(this->evader->get_copy_probabilities(),l_Q_table,h_con,conf.mode==1);
     cout<<"big>>"<<big->size()<<endl;
 
-    conf.levelz=1;
+    //conf.levelz=1;
     if (is_save) QTabel_CSV::state_map_to_csv(h_con.get_map_dico(),conf.home,"h_");
     if (is_save) QTabel_CSV::Q_to_csv(big.get(),conf.home,"h_");
 
@@ -122,10 +125,12 @@ void PathDecomposit::single_train()
     std::unique_ptr<RTDP> pursurer_agent = decompos_paths();
     pursurer_agent->set_Q_table(std::move(big));
     auto sim  = Emulator(pursurer_agent.get(),evader, std::move(State<>(s_state)),conf);
-    sim.main_loop(15e6);
-
+    sim.main_loop(5e6);
+    cout<<"Generated States: (Decomp): "<<pursurer_agent->num_states_gen()<<endl;
+    all_gen_states+=pursurer_agent->num_states_gen();
     if(this->is_save)  QTabel_CSV::Q_to_csv(pursurer_agent->get_Q_tabel().get(),conf.home,"after_");
     if(this->is_save) QTabel_CSV::state_map_to_csv(pursurer_agent->get_map_state(),conf.home,"after_");
+    cout<<"ALL Gen States:(Decomp): "<<all_gen_states<<endl;
 
 }
 
