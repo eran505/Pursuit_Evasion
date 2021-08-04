@@ -10,7 +10,7 @@
 
 class TrajectoriesTree{
 
-   // GoalRecognition GR;
+
     unordered_map<u_int64_t ,vector<int>> dict_mapper_pathz;
     Rewards R = Rewards::getRewards();
     agentEnum e=agentEnum::A;
@@ -22,7 +22,8 @@ class TrajectoriesTree{
     vector<u_int16_t > names;
 public:
 
-    explicit TrajectoriesTree(const std::vector<std::vector<Point>> &pathz,const std::vector<double>& probablities,std::vector<u_int16_t>&& names_):names(names_){
+    explicit TrajectoriesTree(const std::vector<std::vector<Point>> &pathz,const std::vector<double>& probablities,std::vector<u_int16_t>&& names_):names(names_)
+    {
         dict_mapper_pathz=std::unordered_map<u_int64_t ,vector<int>>();
         dict_evader_paths(pathz);
         all_paths = pathz;
@@ -247,6 +248,15 @@ private:
     {
         auto pos = std::find(names.begin(),names.end(),x);
         return std::distance(names.begin(),pos);
+    }
+
+
+
+    u_int32_t get_option_by_tree(const State<> &s)
+    {
+        const Point& p_pos = s.get_position_ref(this->p);
+        int time_t = s.state_time;
+
     }
 
 

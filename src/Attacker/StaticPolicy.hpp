@@ -117,6 +117,7 @@ public:
     std::vector<double> get_copy_probabilities()const
     {
         return mapper->get_all_probabilites();
+
     }
     std::vector<std::vector<Point>> list_only_pos()const
     {

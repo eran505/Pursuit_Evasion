@@ -15,13 +15,13 @@
 
 class PRecAgent {
 
-
     agentEnum attackerID = agentEnum::A;
     agentEnum my_id;
     int max_speed;
     string home;
     GoalRecognition GR;
     std::vector<Point> start_p;
+
 public:
     agentEnum get_id(){return my_id;}
     PRecAgent(int A_max,int D_max, agentEnum agentId, string home1,int seed,const std::vector<Point>& l_start);

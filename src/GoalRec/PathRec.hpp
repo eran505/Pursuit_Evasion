@@ -87,6 +87,8 @@ public:
     void search_tree_with_jumps(const Point &p, int d, const vector<NodeG *> &list_nodes);
 
     static vector<NodeG *> get_all_successors(const vector<NodeG *> &ptr, u_int32_t steps);
+
+    std::vector<int> get_split_vector();
 };
 
 
@@ -96,7 +98,7 @@ void GoalRecognition::load_agent_paths(const std::vector<std::vector<Point>> &pa
     for (size_t i = 0; i < pathz.size(); ++i)
         GoalRecognition::add_path(pathz[i], u_int16_t(i), root.get(),paths_name[i]);
 
-   // printTree();
+    cout<<"init"<<endl;
 }
 
 
@@ -392,6 +394,32 @@ std::vector<NodeG *> GoalRecognition::get_all_successors(NodeG *ptr, u_int32_t s
         }
     }
     return results;
+}
+
+
+std::vector<int> GoalRecognition::get_split_vector()
+{
+    std::vector<int> d;
+    auto size_max_path = std::max_element(std::begin(all_pathz),std::end(all_pathz),[](const vector<Point> &A, const vector<Point> &B){return A.size()<B.size();})->size();
+    int t=0;
+    while (t<size_max_path)
+    {
+        std::vector<Point> l;
+        for (auto & path_num : all_pathz)
+        {
+            if (t>path_num.size())
+                continue;
+            if (std::find(l.begin(),l.end(),path_num[t])==l.end())
+                l.push_back(path_num[t]);
+
+        }
+        d.push_back(l.size());
+        t++;
+    }
+    cout<<d<<endl;
+    cout<<endl;
+    return d;
+
 }
 
 

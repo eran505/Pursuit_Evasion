@@ -65,6 +65,7 @@ public:
     pair<std::vector<std::vector<StatePoint>>,std::vector<double>> geneate_path_loopV2
     (const std::vector<pair<std::vector<Point>,double>>& seq_Goal,const std::vector<weightedPosition>& start_point,u_int num_path)
     {
+        bool missing_gen=false;
         u_int16_t num=0;
         std::vector<std::vector<StatePoint>> l;
         std::vector<double> lp;
@@ -78,8 +79,10 @@ public:
                     auto seq = make_state_seq(item_end_point.first, item_start_point);
                     double w = item_start_point.weightedVal * item_end_point.second*(1.0/num_path);
                     std::vector<StatePoint> path = add_path_to_dictV2(seq);
-                    if( is_duplicated(path,l) )
+                    if( is_duplicated(path,l)) {
+                        missing_gen = true;
                         continue;
+                    }
                     lp.push_back(w);
                     l.push_back(path);
                     cout<<"path #"<<num++<<endl;
@@ -88,6 +91,12 @@ public:
                 break;
             }
 
+        }
+        if(missing_gen)
+        {
+            cout<<"[Uniform] paths priors"<<endl;
+            auto size = l.size();
+            lp = std::vector<double>(size,1.0/size);
         }
         return {l,lp};
     }
@@ -192,7 +201,7 @@ private:
     std::vector<StatePoint> add_middle_point_at_random(const std::vector<StatePoint> &A_list)
     {
         //return {*A_list.begin(),get_random_pointV1(0.6,5),A_list.back()};
-        return {*A_list.begin(),get_random_pointV1(0.3,9),get_random_pointV1(0.85,9),A_list.back()};
+        return {*A_list.begin(),get_random_pointV1(0.3,3),get_random_pointV1(0.85,5),A_list.back()};
         //return {*A_list.begin(),get_random_point(0.4),A_list.back()};
     }
     void pathsToDict(const vector<AStar::StatePoint>& allPath) {

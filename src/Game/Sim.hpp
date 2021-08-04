@@ -11,6 +11,7 @@
 #include "utils/Jumper.h"
 template< typename P, typename E=StaticPolicy >
 class Emulator{
+    GoalRecognition GR;
     E* evader;
     P* pursuer;
     u_int16_t max_number_paths=-1;
@@ -20,10 +21,11 @@ class Emulator{
     int done=0;
     int upper_time_bound = -1;
     std::function<int(const Point&,const Point&)> jump_func;
+    std::vector<int> split_vec;
 public:
 
     Emulator(P* p , E* e , State<> &&s,const configGame &conf)
-    :evader(e),pursuer(p),s_state(s),logger(conf) {
+    :evader(e),pursuer(p),s_state(s),logger(conf),GR(conf._seed,conf.maxA,conf.maxD) {
 
         if (conf.options == 0){
             jump_func = [](const Point &, const Point &) { return 1; };
@@ -34,6 +36,8 @@ public:
             cout<<"[options] enable"<<endl;
         } else assert(false);
         max_number_paths = this->evader->get_all_paths_size();
+        GR.load_agent_paths(e->list_only_pos(),e->get_copy_probabilities(),e->get_paths_names());
+        split_vec = GR.get_split_vector();
     }
 
     void game_sim()
@@ -179,7 +183,12 @@ public:
     }
     void set_jump()
     {
-        s_state.jump = jump_func(s_state.get_position_ref(evader->get_id()),s_state.get_position_ref(pursuer->get_id()));
+        //s_state.jump = jump_func(s_state.get_position_ref(
+        s_state.jump = Jumper::get_jumps_splits(s_state.get_position_ref(evader->get_id()),s_state.get_position_ref(pursuer->get_id()),s_state.state_time,this->split_vec);
+
+        s_state.jump = Jumper::get_jumps(s_state.get_position_ref(evader->get_id()),s_state.get_position_ref(pursuer->get_id()));
+        //cout<<s_state.to_string_state()<<"\t"<<"j:"<<s_state.jump<<"  d:"<<x<<endl;
+        assert(s_state.jump>0);
     }
     int check_upper_bound()
     {

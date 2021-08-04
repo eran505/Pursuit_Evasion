@@ -56,7 +56,7 @@ public:
 
 std::vector<Cell> Heuristicer::heuristic(const State<>& s)const
 {
-    //cout<<s.to_string_state()<<endl;
+   // cout<<s.to_string_state()<<endl;
 //    if(s.to_string_state()=="4_A_(8, 9, 1)_(2, -1, -1)|D_(14, 7, 3)_(1, -1, 0)|_[0]_N_(8, 9, 1) | _1")
 //        cout<<"in"<<endl;
     vector<State<>> vec_q;
