@@ -420,7 +420,7 @@ std::vector<int> GoalRecognition::get_split_vector()
     cout<<endl;
     return d;
 
-}
+};
 
 
 

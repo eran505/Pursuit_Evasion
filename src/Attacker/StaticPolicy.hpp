@@ -76,8 +76,8 @@ public:
     void reset_policy_by_index_path(int index_p )
     {
         mapper->random_choose_path(randomizer.get_double());
-
     }
+    u_int get_choosen_path(){return mapper->get_choosen_path();}
     void policy_data()const {
 
         if(!save_data) return;

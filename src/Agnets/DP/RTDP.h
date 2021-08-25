@@ -71,7 +71,7 @@ RTDP::RTDP(const StaticPolicy *evader,const configGame& conf):
     policer(nullptr), mode(conf.mode)
     {
         if (this->mode==1)
-            policer = std::make_unique<DPGoalRec>(conf._seed,conf.maxA,conf.maxD,evader->list_only_pos(),evader->get_copy_probabilities(),evader->get_paths_names());
+            policer = std::make_unique<BePolicer>(conf._seed,conf.maxA,conf.maxD,evader->list_only_pos(),evader->get_copy_probabilities(),evader->get_paths_names());
         else policer = std::make_unique<Policer>();
 
         memo_rtdp->set_print_mode(conf.levelz);
@@ -108,21 +108,24 @@ void RTDP::update(const Point &a, State<> &&s, Entry state_id) {
 
     //cout<<"["<<s.to_string_state()<<","<<a.to_str()<<"]"<<endl;
     Cell val = this->bellman_update(std::move(s),a);
-    //cout<<state_id<<", "<<a.hashMeAction(Point::actionMax)<<"="<<val<<endl;
+
+#ifdef PRINT
+    cout<<state_id<<", "<<a.hashMeAction(Point::actionMax)<<"="<<val<<endl;
+#endif
     this->memo_rtdp->set_value_matrix(state_id,a.hashMeAction(Point::actionMax),val);
 }
 
 
 Cell RTDP::bellman_update(State<> &&s ,const  Point &a){
 #ifdef PRINT
-    cout<<" [pop] "<<s.to_string_state()<<"  [A] "<<a.to_str()<<endl;
+    cout<<" [pop]  [S] "<<s.to_string_state()<<"  [A] "<<a.to_str()<<endl;
 #endif
     do_SEQ(s,a);
 #ifdef PRINT
-    cout<<"[updated] "<<s.to_string_state()<<endl;
+    cout<<"[updated (P)] "<<s.to_string_state()<<endl;
 #endif
     if(this->mode==1)
-        return this->evaluator.plan_rec_helper(s);
+        return this->evaluator.plan_rec_helper(s,policer->get_object());
 
     auto seq_states = this->action_expend.expander_attacker(s);
 

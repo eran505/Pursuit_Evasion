@@ -40,6 +40,12 @@ public:
             H_plan=[this](const State<> &ptrS,int index_plan) { return this->trajectories_tree.H_planV2(ptrS,index_plan,true);};
         }
 
+        if (h==3)
+        {
+            H = [this](const State<> &ptrS) { return this->trajectories_tree.get_future_dist_all_paths(ptrS);};
+            H_plan=[this](const State<> &ptrS,int index_plan) { return this->trajectories_tree.H_plan(ptrS,index_plan);};
+        }
+
 
     }
 

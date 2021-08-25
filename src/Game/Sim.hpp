@@ -44,7 +44,7 @@ public:
     {
 
         episodes=0;
-
+        // first clear P and only then clear E
         pursuer->reset_policy();
         evader->reset_policy();
         reset_state();
@@ -63,6 +63,9 @@ public:
 
             episodes++;
 
+            #ifdef T_ASSERT
+            assert(s_state.budgets.ptr->t==s_state.state_time);
+            #endif
             if (check_condition())
                 break;
 
@@ -79,11 +82,12 @@ public:
             game_sim();
             if (!logger.eval())
                 continue;
+            //log the generated state number
+            logger.log_scalar(pursuer->num_states_gen());
             logger.is_done();
             if (this->logger.get_done()) {
                 done++;
-                if (done == 5) {
-                    cout<<"in"<<endl;
+                if (done == 2) {
                     break;
                 }
             }
@@ -129,6 +133,7 @@ public:
             std::cout<<"run: "<<episodes<<"\t[state] "<<s_state.to_string_state()<<"\t";
             cout<<" ==> [event] Collision  "<<endl;
             #endif
+
             logger.log_scalar_increment(Logger::COLL);
             return true;
         }
@@ -155,7 +160,7 @@ public:
         this->evader->set_start_point(s_state);
         this->pursuer->set_start_point(s_state);
         s_state.state_time=0;
-        s_state.jump=1;
+        s_state.jump=0;
         pursuer->update_state(s_state);
 
     }
@@ -183,10 +188,10 @@ public:
     }
     void set_jump()
     {
-        //s_state.jump = jump_func(s_state.get_position_ref(
-        s_state.jump = Jumper::get_jumps_splits(s_state.get_position_ref(evader->get_id()),s_state.get_position_ref(pursuer->get_id()),s_state.state_time,this->split_vec);
+        s_state.jump = jump_func(s_state.get_position_ref(evader->get_id()),s_state.get_position_ref(pursuer->get_id()));
+        //s_state.jump = Jumper::get_jumps_splits(s_state.get_position_ref(evader->get_id()),s_state.get_position_ref(pursuer->get_id()),s_state.state_time,this->split_vec);
 
-        s_state.jump = Jumper::get_jumps(s_state.get_position_ref(evader->get_id()),s_state.get_position_ref(pursuer->get_id()));
+        //s_state.jump = Jumper::get_jumps(s_state.get_position_ref(evader->get_id()),s_state.get_position_ref(pursuer->get_id()));
         //cout<<s_state.to_string_state()<<"\t"<<"j:"<<s_state.jump<<"  d:"<<x<<endl;
         assert(s_state.jump>0);
     }

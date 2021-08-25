@@ -13,7 +13,7 @@
 enum agentEnum :short{A=0,D=1,LAST=2};
 
 
-template<typename S = Complex>
+template<typename S = EXtraData>
 class State{
 
 public:
@@ -153,7 +153,7 @@ public:
 
         seed ^= this->budgets.hash_it() + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
         seed ^= this->state_time + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
-        seed ^= this->jump + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
+        //seed ^= this->jump + 0x9e3779b9 + (seed << 7u) + (seed >> 2u);
 
         return seed;
     }

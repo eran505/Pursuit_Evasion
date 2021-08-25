@@ -34,11 +34,12 @@ int main() {
         //conf.maxA=3;
         // all the mode with -1 are GR naive agents
         if (conf.mode<0) {gr_id.push_back(i);continue;}
+        if (conf.mode==1 and conf.h==3) conf.h=2;
 
         auto grid = Initializer::init_grid(conf.sizeGrid,conf.gGoals,conf.probGoals);
         State s;
         s.g_grid=grid.get();
-        auto adata = Complex();
+        auto adata = EXtraData();
         s.add_player_state(agentEnum::A,conf.posAttacker.front(),Point(0),adata);
         s.add_player_state(agentEnum::D,conf.posDefender.front(),Point(0),adata);
         cout<<s.to_string_state()<<endl;
@@ -74,7 +75,7 @@ void game_start(configGame &conf)
     auto grid = Initializer::init_grid(conf.sizeGrid,conf.gGoals,conf.probGoals);
     State s;
     s.g_grid=grid.get();
-    auto adata = Complex();
+    auto adata = EXtraData();
     s.add_player_state(agentEnum::A,conf.posAttacker.front(),Point(0),adata);
     s.add_player_state(agentEnum::D,conf.posDefender.front(),Point(0),adata);
     cout<<s.to_string_state()<<endl;

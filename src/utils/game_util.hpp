@@ -12,6 +12,7 @@
 //#define PRINT
 #define APPEDN 13        //int append=int(pow(int(actionMax),this->capacity))/2;
 //#define PRINT
+//#define T_ASSERT
 #define LOG_DIR "/car_model/debug/"
 //#include <execution>
 #include <string>

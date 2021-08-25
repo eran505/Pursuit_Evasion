@@ -47,11 +47,8 @@ public:
     }
     bool is_one_plan(u_int64_t state_id_)const
     {
-        for (auto& item: look_up_state.at(state_id_).budgets.ptr)
-            for(auto &pair_item_goal:item->goal_list)
-                if(pair_item_goal.second.size()>1)
-                    return false;
-        return true;
+        auto& item = look_up_state.at(state_id_);
+        return item.budgets.ptr->beliefs.size()==1;
     }
 
     auto get_plans(u_int64_t state_id_)const
@@ -60,15 +57,9 @@ public:
         l.reserve(1);
         if (auto pos_iter = look_up_state.find(state_id_);pos_iter==look_up_state.end())
             assert(false);
-        else{
-            auto s = pos_iter->second;
-            for (auto& item: s.budgets.ptr)
-                for(auto &pair_item_goal:item->goal_list)
-                    for(auto& planI : pair_item_goal.second)
-                        l.push_back(planI);
+        else {
+            return pos_iter->second.budgets.ptr->beliefs;
         }
-
-        return l;
     }
 
     auto get_state_from_id(u_int64_t state_id_)const
@@ -155,7 +146,7 @@ public:
 
         auto posBig = big->insert({keyState,vector<Cell>(27)}).first;
         bool is_one_plan = h_con.is_one_plan(keyState);
-        vector<u_int16_t> plansIds = h_con.get_plans(keyState);
+        vector<u_int32_t> plansIds = h_con.get_plans(keyState);
         //Cell max_item=1000000;
         State<> s = h_con.get_state_from_id(keyState);
         if (keyState==5662437437142756322)

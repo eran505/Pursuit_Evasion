@@ -5,9 +5,9 @@
 #ifndef PE_STATEDATA_HPP
 #define PE_STATEDATA_HPP
 #include <utility>
-
+#include "GoalRec/BeliefNode.h"
 #include "utils/game_util.hpp"
-#include "GoalRec//NodeGR.hpp"
+#include "GoalRec/NodeGR.hpp"
 
 struct Single{
 public:
@@ -23,6 +23,34 @@ public:
         return "";
     }
     Single& operator=(NodeG* _ptr){return *this;}
+};
+
+
+struct EXtraData{
+
+    BeliefNode *ptr;
+
+    EXtraData() : ptr(nullptr) {}
+
+    explicit EXtraData(BeliefNode *_ptr) : ptr(_ptr) {};
+
+    [[nodiscard]] u_int64_t hash_it() const {
+        if (ptr == nullptr)
+            return 0;
+        return ptr->hash_it();
+    };
+
+    [[nodiscard]] string to_string() const {
+        if (ptr == nullptr)
+            return "NULL";
+        return ptr->node_to_string();
+    }
+
+    EXtraData &operator=(BeliefNode *other) {
+        ptr = other;
+        return *this;
+    }
+
 };
 
 struct Complex{

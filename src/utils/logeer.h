@@ -31,16 +31,16 @@ class Logger {
     bool done = false;
 public:
     enum info_val {
-        ITER, COLL, GOAL, WALL, STOPED
+        ITER, COLL, GOAL, WALL, STOPED ,STATE
     };
 
-    explicit Logger(const configGame &conf) : info(5), home(conf.home),
+    explicit Logger(const configGame &conf) : info(6), home(conf.home),
                                               file_manger(
                                                       conf.home + LOG_DIR + "S" + std::to_string(conf._seed) + "_I" +
                                                       conf.idNumber + "_M" + std::to_string(conf.mode) + "_O" +
                                                       std::to_string(conf.options) + "_H" + std::to_string(conf.h) +
                                                       "_A" + std::to_string(conf.a) + "_Eval.csv", 10) {
-        file_manger.set_header_vec({"episodes", "Collision", "Wall", "Goal"});
+        file_manger.set_header_vec({"episodes", "Collision", "Wall", "Goal","stop","States"});
     }
 
     explicit Logger(const string &home, const string &file_name) : info(4), home(home),
@@ -60,6 +60,11 @@ public:
 
     //[[maybe_unused]] void set_done(bool bol){done=bol;};
 public:
+    template<typename K>
+    void log_scalar(K v,info_val idx = STATE)
+    {
+        info[idx]=v;
+    }
     void log_scalar_increment(info_val val) {
         info[val]++;
         info[ITER]++;
@@ -80,7 +85,7 @@ public:
         cout << "\tColl:" << info[COLL];
         cout << "\tGoal:" << info[GOAL];
         cout << "\tWall:" << info[WALL];
-        cout << "\tStoped:" << info[STOPED];
+        //cout << "\tStoped:" << info[STOPED];
         cout << endl;
     }
 

@@ -67,6 +67,7 @@ public:
         path_const = k;
     }
     PathMapper()=default;
+    u_int get_choosen_path(){return this->current_path;}
     u_int32_t get_time_step(){return time_t;}
     void random_choose_path(double seed)
     {

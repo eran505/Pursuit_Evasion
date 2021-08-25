@@ -25,7 +25,7 @@ class PRecAgent {
 public:
     agentEnum get_id(){return my_id;}
     PRecAgent(int A_max,int D_max, agentEnum agentId, string home1,int seed,const std::vector<Point>& l_start);
-
+    size_t num_states_gen(){return 0;}
     Point get_action(State<> &s) ;
     ~PRecAgent() =default;
     [[nodiscard]] int get_max_speed() const{return max_speed;}

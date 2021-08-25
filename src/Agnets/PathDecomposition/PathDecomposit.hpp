@@ -67,7 +67,7 @@ void PathDecomposit::all_train()
 {
     std::unique_ptr<RTDP> pursurer_agent = decompos_paths();
     auto sim  = Emulator(pursurer_agent.get(),evader, std::move(State<>(s_state)),conf);
-    sim.main_loop(5e6); //40000000
+    sim.main_loop(2e6); //40000000
 
     cout<<"Generated States: (all): "<<pursurer_agent->num_states_gen()<<endl;
 

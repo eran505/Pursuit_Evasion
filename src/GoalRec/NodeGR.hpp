@@ -12,6 +12,7 @@ struct NodeG{
     vector<std::unique_ptr<NodeG>> child;
     vector<pair<Point,std::vector<u_int16_t>>> goal_list;
     vector<double> goal_likelihood;
+
     int min_step=std::numeric_limits<int>::max();;
 public:
     NodeG():pos(0),parent(nullptr),child(vector<std::unique_ptr<NodeG>>()),
