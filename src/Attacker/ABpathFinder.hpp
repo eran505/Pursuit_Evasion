@@ -24,7 +24,7 @@ public:
     {}
 
     vector<vector<AStar::StatePoint>> get_paht_a_b(AStar::StatePoint& source_,const AStar::StatePoint& target_){
-        cout<<"source:"<<source_<<" target:"<<target_<<endl;
+        //cout<<"source:"<<source_<<" target:"<<target_<<endl;
         gen.findPath(source_,target_,false, true);
         //cout<<"done A*"<<endl;
         assert(!gen.get_deep_list_nodes_ref_const().empty());
@@ -32,7 +32,15 @@ public:
         //assert(!list_nodes.empty());
     }
     vector<AStar::StatePoint> get_path_a_b_Astar(AStar::StatePoint& source_,const AStar::StatePoint& target_,bool at_random=false){
+        //cout<<"source: "<<source_.pos.to_str()<<"  target: "<<target_.pos.to_str()<<endl;
         auto l = get_paht_a_b(source_,target_);
+//        for (const auto &x:l)
+//        {
+//            for (int i = 0; i < x.size(); ++i) {
+//                cout<<"["<<i<<"]"<<x[i].pos.to_str()<<", ";
+//            }
+//            cout<<"\n";
+//        }
         int index=0;
         if(at_random)
             index = range_random(0,int(l.size()-1));
@@ -46,8 +54,8 @@ public:
 class ABfinder{
     Randomizer randomizer_obj;
     Point GridSzie;
-    double stho=0.99999999999999999;
-    u_int limt=10; //10
+    double stho=1.0;
+    u_int limt=3; //10
     u_int16_t MAX_SPEED=2;
     Point last_action;
     bool is_random=false;

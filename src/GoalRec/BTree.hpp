@@ -6,7 +6,7 @@
 #define PE_BTREE_HPP
 #include "utils/game_util.hpp"
 #include "BeliefNode.h"
-#define MAX_PATH_LEN 1000
+#define MAX_PATH_LEN 10000
 
 class BTree{
 
@@ -19,7 +19,7 @@ class BTree{
     unordered_map<u_int32_t,BeliefNode*> belief_dict;
 
 public:
-
+    int path_evader=0;
     BTree()=default;
 
     explicit BTree(int seed_, int E_speed, int P_speed):
@@ -160,12 +160,13 @@ BeliefNode *BTree::get_start_ptr(const Point &l_e) {
 }
 
 BeliefNode *BTree::get_next_step_by_loc(BeliefNode *node, int steps, const Point &loc_e) {
-    //cout<<"["<<steps<<"] "<<node->node_to_string()<<"  loc:"<<loc_e.to_str()<<'\n';
+//    cout<<"["<<steps<<"] "<<node->node_to_string()<<"  loc:"<<loc_e.to_str()<<"\tP:"<<this->path_evader<<'\n';
     std::vector<BeliefNode*> results;
     auto all_belief = node->get_plans();
     auto t = node->t;
     for (auto b :all_belief)
     {
+        b=path_evader;
         auto next_t = std::min(int(t+steps),int(all_pathz[b].size()-1));
         auto entry = MAX_PATH_LEN*b+next_t;
         auto candidate = this->belief_dict.at(entry);

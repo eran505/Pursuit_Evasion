@@ -21,10 +21,13 @@ class Heuristicer{
     TrajectoriesTree trajectories_tree;
     std::function<double (const State<> &s)> H;
     std::function<double (const State<> &s,int plan)> H_plan;
+    std::unordered_map<u_int64_t,vector<u_int32_t>> pos_to_path;
 
 public:
     explicit Heuristicer(int maxP,int h,const vector<vector<Point>>& l_pathz,const vector<double> &prob,std::vector<u_int16_t> &&vec_names):max_speed_P(maxP),trajectories_tree(l_pathz,prob,std::move(vec_names))
     {
+        //make_dict_pos_to_path_idx(l_pathz);
+
         if (h==0){
             H = [this](const State<> &ptrS) { return R.CollReward;};
             H_plan=[this](const State<> &ptrS,int index_plan) { return R.CollReward;};
@@ -45,8 +48,38 @@ public:
             H = [this](const State<> &ptrS) { return this->trajectories_tree.get_future_dist_all_paths(ptrS);};
             H_plan=[this](const State<> &ptrS,int index_plan) { return this->trajectories_tree.H_plan(ptrS,index_plan);};
         }
+        if (h==4)
+        {
+            H = [this](const State<> &ptrS) { return this->trajectories_tree.get_future_dist_all_paths_imporve(ptrS);};
+            H_plan=[this](const State<> &ptrS,int index_plan) { return this->trajectories_tree.H_plan(ptrS,index_plan);};
+        }
+        if (h==5)
+        {
+            H = [this](const State<> &ptrS) { return this->trajectories_tree.get_future_dist_all_paths_imporve_expection(ptrS);};
+            H_plan=[this](const State<> &ptrS,int index_plan) { return this->trajectories_tree.H_plan(ptrS,index_plan);};
+        }
 
 
+    }
+    void make_dict_pos_to_path_idx(const vector<vector<Point>>& l_pathz)
+    {
+        u_int32_t indx_id_path=-1;
+        for (const auto &path :l_pathz)
+        {
+            indx_id_path++;
+            for (const auto& pos:path)
+            {
+                auto ky = pos.expHash();
+                if (auto pos_iter = this->pos_to_path.find(ky);pos_iter==pos_to_path.end()) {
+                        auto item = pos_to_path.try_emplace(ky);
+                        item.first->second.push_back(indx_id_path);
+
+                } else{
+                    cout<<"in"<<endl;
+                    pos_iter->second.push_back(indx_id_path);
+                }
+            }
+        }
     }
 
     [[nodiscard]] std::vector<Cell> heuristic(const State<>& s)const;

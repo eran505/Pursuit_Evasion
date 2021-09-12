@@ -39,6 +39,7 @@ public:
     void update_state(State<> &s){};
     void intial_args(const std::vector<std::vector<Point>> &pathz,vector<double> &&path_probabilties,std::vector<u_int16_t> &&names);
     Point get_inital_place();
+    void update_B_tree(int x){}
 };
 
 

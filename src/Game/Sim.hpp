@@ -87,7 +87,7 @@ public:
             logger.is_done();
             if (this->logger.get_done()) {
                 done++;
-                if (done == 2) {
+                if (done == 1) {
                     break;
                 }
             }
@@ -134,6 +134,7 @@ public:
             cout<<" ==> [event] Collision  "<<endl;
             #endif
 
+
             logger.log_scalar_increment(Logger::COLL);
             return true;
         }
@@ -162,7 +163,7 @@ public:
         s_state.state_time=0;
         s_state.jump=0;
         pursuer->update_state(s_state);
-
+        pursuer->update_B_tree(evader->get_currnt_path());
     }
     void take_action_pursuer()
     {

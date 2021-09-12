@@ -48,7 +48,7 @@ public:
     {
         this->mapper=std::move(mapper_ptr);
     }
-
+    int get_currnt_path(){  return mapper->get_choosen_path();}
     std::unique_ptr<PathMapper<u_int32_t>> get_mapper()
     {
         return std::move(mapper);
@@ -79,16 +79,23 @@ public:
     }
     u_int get_choosen_path(){return mapper->get_choosen_path();}
     void policy_data()const {
+        auto p_list = mapper->get_all_probabilites_ref();
+
+
+        string pathFile1=this->home+"/car_model/debug/NumP.csv";
+        csvfile csv(pathFile1,";"); // throws exceptions!
+        csv<<exp_id; csv<<std::to_string(p_list.size());csv<<endrow;
+
 
         if(!save_data) return;
-        string pathFile=this->home+"/car_model/debug/p_"+exp_id+".csv";
-        pathFile=this->home+"/car_model/debug/p.csv";
+        auto pathz_list = mapper->get_all_pathz_ref();
+        auto string_size = std::to_string(p_list.size());
+        string pathFile=this->home+"/car_model/debug/p"+".csv";
         //print Q table--------------------------------
         try{
 
             csvfile csv(pathFile,";"); // throws exceptions!
-            auto p_list = mapper->get_all_probabilites_ref();
-            auto pathz_list = mapper->get_all_pathz_ref();
+
             for (int i = 0; i < p_list.size(); ++i) {
                 csv<<"P:"+std::to_string(p_list[i]);
                 for(const auto &item:pathz_list[i])

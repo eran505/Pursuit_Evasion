@@ -23,7 +23,7 @@ public:
     {}
     virtual void search_state(State<> &s)
     {}
-    [[nodiscard]] virtual const BTree* get_object()const{return nullptr;};
+    [[nodiscard]] virtual BTree* get_object(){return nullptr;};
 
 
 
@@ -59,7 +59,7 @@ public:
         }
         assert(found);
     }
-    const BTree* get_object()const override {return &GR;}
+    BTree* get_object() override {return &GR;}
 };
 //
 //class DPGoalRec:public Policer{

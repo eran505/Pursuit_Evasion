@@ -20,7 +20,9 @@ class PathGenartor{
     unordered_map<u_int64_t,unordered_map<uint,double>> RAW_policyMap;
     Normalizer nom;
     Randomizer random_gen;
+
 public:
+
     PathGenartor(u_int64_t seed,const Point &girdSize,u_int32_t max_speed)
             :grid_size(girdSize),aBFinder(seed,girdSize,max_speed),random_gen(seed){
 
@@ -180,10 +182,11 @@ private:
         cout<<"Random--->"<<p.to_str()<<endl;
         return {p,Point(1,1,0)};
     }
-    StatePoint get_random_pointV1(double x_pos,int div=3)
+    StatePoint get_random_pointV1(double x_pos,int div=3,int x_axis=-1)
     {
         Point p;
-        p.array[0]=int((this->grid_size[0]*x_pos));
+        if (x_axis==-1) x_axis =this->grid_size[0];
+        p.array[0]=int((x_axis*x_pos));
         if (div==3)
             p.array[1]=int(this->grid_size[1]*get_y_value_static_point_3(this->random_gen.get_double()));
         else if (div==5)
@@ -192,17 +195,24 @@ private:
             p.array[1]=int(this->grid_size[1]*0.5);
         else if (div==2)
             p.array[1]=int(this->grid_size[1]*get_y_value_static_point_2(this->random_gen.get_double()));
+        else if (div==0)
+            p.array[1]=int(this->grid_size[1]*get_y_value_static_point_little(this->random_gen.get_double()));
+        else if (div==4)
+            p.array[1]=int(this->grid_size[1]*get_y_value_static_point_4(this->random_gen.get_double()));
         else
-            p.array[1]=int(this->grid_size[1]*get_y_value_static_point_9(this->random_gen.get_double()));
+            assert(false);
+            //p.array[1]=int(this->grid_size[1]*get_y_value_static_point_9(this->random_gen.get_double()));
+
         p.array[2]=3;
         cout<<"Random--->"<<p.to_str()<<endl;
         return {p,Point(1,1,0)};
     }
     std::vector<StatePoint> add_middle_point_at_random(const std::vector<StatePoint> &A_list)
     {
-        //return {*A_list.begin(),get_random_pointV1(0.6,5),A_list.back()};
-        return {*A_list.begin(),get_random_pointV1(0.1,3),get_random_pointV1(0.2,1),get_random_pointV1(0.4,1),A_list.back()};
-        //return {*A_list.begin(),get_random_point(0.4),A_list.back()};
+        auto x_axis = A_list.back().pos.array[0];
+        // py1
+        return {*A_list.begin(),get_random_pointV1(0.1,1,x_axis),get_random_pointV1(0.4,2,x_axis),get_random_pointV1(0.6,3,x_axis),get_random_pointV1(0.9,4,x_axis),A_list.back()};
+        // py2
     }
     void pathsToDict(const vector<AStar::StatePoint>& allPath) {
         //RAW_policyMap.clear();
@@ -246,6 +256,31 @@ private:
             //if(seed<0.7) return 0.7
         else return 0.8;
     }
+
+    static double get_y_value_static_point_little(double seed)
+    {
+
+        if(seed<0.5) return 0.41;
+        if(seed<0.10) return 0.42;
+        if(seed<0.15) return 0.43;
+        if(seed<0.20) return 0.44;
+        if(seed<0.25) return 0.45;
+        if(seed<0.30) return 0.46;
+        if(seed<0.35) return 0.47;
+        if(seed<0.45) return 0.48;
+        if(seed<0.50) return 0.49;
+        if(seed<0.55) return 0.50;
+        if(seed<0.60) return 0.51;
+        if(seed<0.65) return 0.52;
+        if(seed<0.70) return 0.53;
+        if(seed<0.75) return 0.54;
+        if(seed<0.80) return 0.55;
+        if(seed<0.85) return 0.56;
+        if(seed<0.90) return 0.57;
+        if(seed<0.95) return 0.58;
+        else return 0.59;
+    }
+
     static double get_y_value_static_point_3(double seed)
     {
 

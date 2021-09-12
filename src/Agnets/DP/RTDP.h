@@ -53,7 +53,8 @@ public:
 
     size_t num_states_gen(){return this->memo_rtdp->get_size_state_map();}
 
-    std::unordered_map<u_int64_t,State<>> get_map_state(){ return std::move(this->memo_rtdp->get_map_state());}
+    void update_B_tree(int path);
+        std::unordered_map<u_int64_t,State<>> get_map_state(){ return std::move(this->memo_rtdp->get_map_state());}
 private:
     Cell bellman_update(State<> &&s , const Point &a);
     void do_SEQ(State<> &s, const Point &a);
@@ -70,7 +71,7 @@ RTDP::RTDP(const StaticPolicy *evader,const configGame& conf):
     start_point(conf.posDefender.front()),
     policer(nullptr), mode(conf.mode)
     {
-        if (this->mode==1)
+        if (this->mode>=1)
             policer = std::make_unique<BePolicer>(conf._seed,conf.maxA,conf.maxD,evader->list_only_pos(),evader->get_copy_probabilities(),evader->get_paths_names());
         else policer = std::make_unique<Policer>();
 
@@ -124,7 +125,7 @@ Cell RTDP::bellman_update(State<> &&s ,const  Point &a){
 #ifdef PRINT
     cout<<"[updated (P)] "<<s.to_string_state()<<endl;
 #endif
-    if(this->mode==1)
+    if(this->mode>=1)
         return this->evaluator.plan_rec_helper(s,policer->get_object());
 
     auto seq_states = this->action_expend.expander_attacker(s);
@@ -162,6 +163,12 @@ void RTDP::do_SEQ(State<> &s,const Point& a)
 {
     auto a_tmp = Point(a);
     s.applyAction(this->my_id,a_tmp,this->max_speed,s.jump);
+}
+
+void RTDP::update_B_tree(int path) {
+    BTree *ptrTree = this->policer->get_object();
+    if (ptrTree== nullptr) return;
+    ptrTree->path_evader=path;
 }
 
 

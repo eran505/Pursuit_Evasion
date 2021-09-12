@@ -20,7 +20,7 @@ class PathDecomposit{
     StaticPolicy* evader;
     configGame conf;
     vector<std::unique_ptr<Table>> l_Q_table;
-    bool is_save = true;
+    bool is_save = false;
 
 public:
     PathDecomposit(StaticPolicy *evader_ptr,configGame &conf_object,const State<>& _s_state);
@@ -67,7 +67,9 @@ void PathDecomposit::all_train()
 {
     std::unique_ptr<RTDP> pursurer_agent = decompos_paths();
     auto sim  = Emulator(pursurer_agent.get(),evader, std::move(State<>(s_state)),conf);
-    sim.main_loop(2e6); //40000000
+    auto ep = conf.ep*1000;
+    cout<<" [episodes] ===> "<<ep<<endl;
+    sim.main_loop(ep); //40000000
 
     cout<<"Generated States: (all): "<<pursurer_agent->num_states_gen()<<endl;
 
@@ -107,7 +109,7 @@ void PathDecomposit::single_train()
     update_evader_paths(std::move(all_paths_),std::move(prob_all_paths_));
     FinderH h_con = FinderH(conf.maxD,conf.h,this->evader->list_only_pos(),evader->get_copy_probabilities(),evader->get_paths_names(),std::move(map_dico));
 
-    if(this->conf.mode==1)
+    if(this->conf.mode>=1)
         std::for_each(l_Q_table.begin(), l_Q_table.end(), [&h_con](auto &item) {
             h_con.infer_state(item.get());
         });
@@ -125,7 +127,7 @@ void PathDecomposit::single_train()
     std::unique_ptr<RTDP> pursurer_agent = decompos_paths();
     pursurer_agent->set_Q_table(std::move(big));
     auto sim  = Emulator(pursurer_agent.get(),evader, std::move(State<>(s_state)),conf);
-    sim.main_loop(5e6);
+    sim.main_loop(5e4);
     cout<<"Generated States: (Decomp): "<<pursurer_agent->num_states_gen()<<endl;
     all_gen_states+=pursurer_agent->num_states_gen();
     if(this->is_save)  QTabel_CSV::Q_to_csv(pursurer_agent->get_Q_tabel().get(),conf.home,"after_");

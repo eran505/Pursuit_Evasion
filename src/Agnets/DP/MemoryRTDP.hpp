@@ -44,7 +44,7 @@ public:
 
         if (mode == 0) hash_func = [](const State<> &ptrS) { return ptrS.getHashValue();};
         else if(mode==1) hash_func=[](const State<> &ptrS){return ptrS.getHashValueGR();};
-        else if(mode==2) hash_func=[](const State<> &ptrS){return ptrS.getHashValueT();};
+        else if(mode==2) hash_func=[](const State<> &ptrS){return ptrS.getHashValue();};
         else assert(false);
     }
 
@@ -68,6 +68,8 @@ public:
         verbose = mode==1;
     }
 };
+
+
 
 std::pair<Point, u_int64_t> MemoryRtdp::get_argMAx(const State<> &s) {
     auto entry_id = this->get_entry(s);

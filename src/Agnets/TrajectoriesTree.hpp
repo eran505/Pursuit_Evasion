@@ -18,6 +18,8 @@ class TrajectoriesTree{
     std::vector<std::vector<Point>> all_paths;
     std::vector<double> prior_p_paths;
     std::unique_ptr<std::unordered_map<u_int64_t,std::vector<int16_t>>>  dict_loc_time= nullptr;
+    std::unique_ptr<std::unordered_map<u_int64_t,std::vector<int16_t>>>  dict_loc= nullptr;
+
     vector<u_int16_t > names;
 public:
 
@@ -33,6 +35,7 @@ public:
     void fill_map_loc()
     {
         dict_loc_time = std::make_unique<std::unordered_map<u_int64_t,std::vector<int16_t>>>(evader_loc_time_t_to_pahts());
+        dict_loc = std::make_unique<std::unordered_map<u_int64_t,std::vector<int16_t>>>(evader_loc_time_t_to_pahts(false));
     }
 
     std::vector<std::vector<Point>> get_pathz(){return all_paths;}
@@ -92,8 +95,54 @@ public:
         }
         return this->R.CollReward*std::pow(R.discountF,min_step_val);
     }
+    double get_future_dist_all_paths_imporve_expection(const State<> &s)const
+    {
 
+        const Point& p_pos = s.get_position_ref(this->p);
+        const Point& e_pos = s.get_position_ref(this->e);
 
+        auto begin_look_up = s.state_time;
+        //begin_look_up = s.state_time;
+        auto vec = dict_loc->at(e_pos.expHash());
+        std::vector<double>D(vec.size());
+        double result=0.0;
+        double sum_all_prob = 0.0;
+        for(int k=0;k<vec.size();k++)
+        {
+            u_int index_plan = name_to_idx(vec[k]);
+            auto steps =get_min_step_diffV2(p_pos,index_plan,begin_look_up,s.jump);
+            if(steps==MAX_STEP)
+                D[k] = this->R.GoalReward*std::pow(R.discountF,all_paths[index_plan].size()-begin_look_up-1);
+            else D[k]= this->R.CollReward*std::pow(R.discountF,steps);
+            sum_all_prob+=prior_p_paths[index_plan];
+        }
+        for (int i = 0; i < D.size(); ++i) {
+            u_int index_plan = name_to_idx(vec[i]);
+            result+=D[i]*(prior_p_paths[index_plan]/sum_all_prob);
+        }
+        return result;
+    }
+
+    double get_future_dist_all_paths_imporve(const State<> &s)const
+    {
+
+        const Point& p_pos = s.get_position_ref(this->p);
+        const Point& e_pos = s.get_position_ref(this->e);
+        auto vec = dict_loc_time->at(e_pos.expHash()+s.state_time);
+        assert(!vec.empty() and vec.size()<=this->all_paths.size());
+        auto begin_look_up = s.state_time;
+        std::vector<double>D(all_paths.size());
+
+        for(int k=0;k<vec.size();k++)
+        {
+            u_int index_plan = name_to_idx(vec[k]);
+            auto steps =get_min_step_diff_last_orgin(p_pos,index_plan,begin_look_up);
+            if(steps==MAX_STEP)
+                D[k] = this->R.GoalReward*std::pow(R.discountF,all_paths[index_plan].size()-begin_look_up-1);
+            else D[k]= this->R.CollReward*std::pow(R.discountF,steps);
+        }
+        return *std::max_element(D.begin(),D.end());
+    }
 
     double get_future_dist_all_paths(const State<> &s)const
     {
@@ -101,11 +150,11 @@ public:
         const Point& p_pos = s.get_position_ref(this->p);
         auto begin_look_up = s.state_time;
         std::vector<double>D(all_paths.size());
-        double result=0.0;
+
         for(int k=0;k<all_paths.size();k++)
         {
             u_int index_plan = name_to_idx(k);
-            auto steps =get_min_step_diffV2(p_pos,index_plan,begin_look_up,s.jump);
+            auto steps =get_min_step_diff_last_orgin(p_pos,index_plan,begin_look_up);
             if(steps==MAX_STEP) D[k] = 0;
             else D[k]= this->R.CollReward*std::pow(R.discountF,steps);
         }
@@ -207,12 +256,14 @@ private:
         return min_step;
     }
 
-    std::unordered_map<u_int64_t,std::vector<int16_t>> evader_loc_time_t_to_pahts()
+    std::unordered_map<u_int64_t,std::vector<int16_t>> evader_loc_time_t_to_pahts(bool time_t=true)
     {
         std::unordered_map<u_int64_t,std::vector<int16_t>> dico;
         for(int i=0;i<all_paths.size();++i){
             for (int j=0;j<all_paths[i].size();++j){
-                u_int64_t h = all_paths[i][j].expHash()+j;
+                u_int64_t h;
+                if(time_t)  h = all_paths[i][j].expHash()+j;
+                else  h = all_paths[i][j].expHash();
                 //cout<<"loc:"<<all_paths[i][j].to_str()<<"\t t:"<<j<<endl;
                 if(auto pos = dico.find(h);pos==dico.end()){
                     auto itesr = dico.try_emplace(h,1);

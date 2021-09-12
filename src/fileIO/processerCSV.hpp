@@ -120,6 +120,7 @@ struct configGame{
     int mode = 0;
     int h=0;
     int a=1;
+    double ep=100;
 public:
     string home=getRootDir();
 
@@ -165,6 +166,16 @@ public:
             h = stoi(row[13]);
         if(row.size()>14)
             a = stoi(row[14]);
+        if(row.size()>15) {
+            ep = stoi(row[15]);
+
+        }
+        if(row.size()>16){
+            if (stoi(row[16])>0) {
+                _seed = stoi(row[16]);
+                generator = std::default_random_engine(_seed);
+            }
+        }
         //this->levelz=int(std::log2(this->sizeGrid.getMax()))+1;
         const auto s = std::chrono::system_clock::now();
         //std::chrono::duration<long,std::ratio<1,1>>::rep
