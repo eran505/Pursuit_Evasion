@@ -166,10 +166,8 @@ public:
             h = stoi(row[13]);
         if(row.size()>14)
             a = stoi(row[14]);
-        if(row.size()>15) {
+        if(row.size()>15)
             ep = stoi(row[15]);
-
-        }
         if(row.size()>16){
             if (stoi(row[16])>0) {
                 _seed = stoi(row[16]);

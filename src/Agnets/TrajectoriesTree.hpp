@@ -19,7 +19,6 @@ class TrajectoriesTree{
     std::vector<double> prior_p_paths;
     std::unique_ptr<std::unordered_map<u_int64_t,std::vector<int16_t>>>  dict_loc_time= nullptr;
     std::unique_ptr<std::unordered_map<u_int64_t,std::vector<int16_t>>>  dict_loc= nullptr;
-
     vector<u_int16_t > names;
 public:
 

@@ -44,7 +44,7 @@ public:
 
         if (mode == 0) hash_func = [](const State<> &ptrS) { return ptrS.getHashValue();};
         else if(mode==1) hash_func=[](const State<> &ptrS){return ptrS.getHashValueGR();};
-        else if(mode==2) hash_func=[](const State<> &ptrS){return ptrS.getHashValue();};
+        else if(mode==2) hash_func=[](const State<> &ptrS){return ptrS.getHashValueT();};
         else assert(false);
     }
 

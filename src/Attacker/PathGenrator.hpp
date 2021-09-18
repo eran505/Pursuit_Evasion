@@ -20,7 +20,7 @@ class PathGenartor{
     unordered_map<u_int64_t,unordered_map<uint,double>> RAW_policyMap;
     Normalizer nom;
     Randomizer random_gen;
-
+    vector<vector<Point>> l_generated_paths;
 public:
 
     PathGenartor(u_int64_t seed,const Point &girdSize,u_int32_t max_speed)
@@ -129,7 +129,38 @@ private:
 
     }
 
+    bool inset_to_l_generated_paths(const std::vector<StatePoint> &l){
+        int acc=0;
+        bool found=false;
 
+        for (const auto &item : this->l_generated_paths )
+        {
+            acc=0;
+            for(int i=0;i<item.size();++i)
+            {
+                if (l[i].pos==item[i])
+                    acc++;
+
+            }
+            if (acc==item.size())
+            {
+                found = true;
+                break;
+            }
+
+        }
+        if (!found)
+        {
+            vector<Point> x;
+            for(const auto &item:l)
+                x.push_back(item.pos);
+            l_generated_paths.push_back(x);
+            cout<<l_generated_paths.size()<<endl;
+            return false;
+        }
+        return true;
+
+    }
 
     std::vector<StatePoint> add_path_to_dictV2(const std::vector<StatePoint> &A_list)
     {
@@ -137,6 +168,10 @@ private:
         vector<AStar::StatePoint> seq_state_all;
         auto new_list = add_middle_point_at_random(A_list);
         //auto new_list=A_list;
+        while(inset_to_l_generated_paths(new_list))
+        {
+            new_list = add_middle_point_at_random(A_list);
+        }
         cout<<new_list<<endl;
         if(new_list.size()==3)
         {
@@ -179,7 +214,7 @@ private:
         p.array[0]=int((this->grid_size[0]*x_pos));
         p.array[1]=int(this->random_gen.get_double()*(this->grid_size[1]*0.98));
         p.array[2]=0;
-        cout<<"Random--->"<<p.to_str()<<endl;
+        //cout<<"Random--->"<<p.to_str()<<endl;
         return {p,Point(1,1,0)};
     }
     StatePoint get_random_pointV1(double x_pos,int div=3,int x_axis=-1)
@@ -199,6 +234,10 @@ private:
             p.array[1]=int(this->grid_size[1]*get_y_value_static_point_little(this->random_gen.get_double()));
         else if (div==4)
             p.array[1]=int(this->grid_size[1]*get_y_value_static_point_4(this->random_gen.get_double()));
+        else if (div==9)
+            p.array[1]=int(this->grid_size[1]*get_y_value_static_point_9(this->random_gen.get_double()));
+        else if (div==7)
+            p.array[1]=int(this->grid_size[1]*get_y_value_static_point_7(this->random_gen.get_double()));
         else
             assert(false);
             //p.array[1]=int(this->grid_size[1]*get_y_value_static_point_9(this->random_gen.get_double()));
@@ -211,7 +250,7 @@ private:
     {
         auto x_axis = A_list.back().pos.array[0];
         // py1
-        return {*A_list.begin(),get_random_pointV1(0.1,1,x_axis),get_random_pointV1(0.4,2,x_axis),get_random_pointV1(0.6,3,x_axis),get_random_pointV1(0.9,4,x_axis),A_list.back()};
+        return {*A_list.begin(),get_random_pointV1(0.15,9,x_axis),get_random_pointV1(0.3,1,x_axis),get_random_pointV1(0.9,1,x_axis),A_list.back()};
         // py2
     }
     void pathsToDict(const vector<AStar::StatePoint>& allPath) {
@@ -247,6 +286,7 @@ private:
 
     static double get_y_value_static_point_4(double seed)
     {
+
         //if(seed<0.1) return 0.1;
         if(seed<0.25) return 0.2;
         //if(seed<0.3) return 0.3;
@@ -256,6 +296,8 @@ private:
             //if(seed<0.7) return 0.7
         else return 0.8;
     }
+
+
 
     static double get_y_value_static_point_little(double seed)
     {
@@ -303,6 +345,18 @@ private:
         //if(seed<0.1) return 0.1;
         if(seed<0.20) return 0.2;
         //if(seed<0.3) return 0.3;
+        if(seed<0.40) return 0.4;
+        if(seed<0.60) return 0.6;
+        if(seed<0.80) return 0.8;
+            //if(seed<0.7) return 0.7
+        else return 0.96;
+    }
+    static double get_y_value_static_point_7(double seed)
+    {
+
+        if(seed<0.1) return 0.1;
+        if(seed<0.20) return 0.2;
+        if(seed<0.3) return 0.3;
         if(seed<0.40) return 0.4;
         if(seed<0.60) return 0.6;
         if(seed<0.80) return 0.8;

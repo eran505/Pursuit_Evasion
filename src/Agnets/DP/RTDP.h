@@ -71,7 +71,7 @@ RTDP::RTDP(const StaticPolicy *evader,const configGame& conf):
     start_point(conf.posDefender.front()),
     policer(nullptr), mode(conf.mode)
     {
-        if (this->mode>=1)
+        if (this->mode==1)
             policer = std::make_unique<BePolicer>(conf._seed,conf.maxA,conf.maxD,evader->list_only_pos(),evader->get_copy_probabilities(),evader->get_paths_names());
         else policer = std::make_unique<Policer>();
 
@@ -125,7 +125,7 @@ Cell RTDP::bellman_update(State<> &&s ,const  Point &a){
 #ifdef PRINT
     cout<<"[updated (P)] "<<s.to_string_state()<<endl;
 #endif
-    if(this->mode>=1)
+    if(this->mode==1)
         return this->evaluator.plan_rec_helper(s,policer->get_object());
 
     auto seq_states = this->action_expend.expander_attacker(s);

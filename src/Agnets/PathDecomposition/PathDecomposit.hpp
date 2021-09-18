@@ -109,7 +109,7 @@ void PathDecomposit::single_train()
     update_evader_paths(std::move(all_paths_),std::move(prob_all_paths_));
     FinderH h_con = FinderH(conf.maxD,conf.h,this->evader->list_only_pos(),evader->get_copy_probabilities(),evader->get_paths_names(),std::move(map_dico));
 
-    if(this->conf.mode>=1)
+    if(this->conf.mode==1)
         std::for_each(l_Q_table.begin(), l_Q_table.end(), [&h_con](auto &item) {
             h_con.infer_state(item.get());
         });
