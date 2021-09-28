@@ -484,7 +484,9 @@ public:
         int res=0;
         for (int i = 0; i < a.capacity; ++i)
         {
-            if(auto diff = std::abs(a[i] - b[i]); diff>res) res=diff;
+
+            if(auto diff = std::abs(a[i] - b[i]); diff>res)
+                res=diff;
         }
         return res;
     }

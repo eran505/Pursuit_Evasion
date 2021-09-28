@@ -24,9 +24,11 @@ class PathMapper{
     u_int16_t current_path=-1;
     u_int32_t step_counter=0;
     std::unordered_map<uint64_t,vector<K>> mapper_pathz;
+    std::unordered_map<uint64_t,vector<std::pair<int,int>>> state_lookup;
     std::vector<u_int32_t> memo;
     bool is_constant=false;
     int path_const = 0;
+    int mode=-1;
 public:
     explicit PathMapper(vector<vector<StatePoint>> pathz,std::vector<double> probabilities_paths,const std::vector<u_int16_t> &path_name_)
             :all_paths(std::move(pathz)),size_pathz(all_paths.size())
@@ -90,27 +92,60 @@ public:
 
         this->memo[step_counter]=time_t;
     }
-    vector<tuple<StatePoint,int,double>> get_next_states(u_int64_t hash_state,int jumps)
+
+//    vector<tuple<StatePoint,int,double>> get_next_states(u_int64_t hash_state,int jumps)
+//    {
+//        assert(step_counter>=0 );
+//        time_t=memo[step_counter--];
+//        std::vector<K> indexing_arr = this->mapper_pathz.at(hash_state);
+//        double sum=0;
+//        std::for_each(indexing_arr.begin(),indexing_arr.end(),[&](auto &i){sum+=this->probabilities[i];});
+//        vector<tuple<StatePoint,int,double>> next_states_list;
+//        next_states_list.reserve(indexing_arr.size());
+//        std::for_each(indexing_arr.begin(),indexing_arr.end(),[&](const K& index_path){
+//            next_states_list.emplace_back(get_jumping_state(time_t,index_path),time_t,this->probabilities[index_path]/sum);
+//        });
+//
+//
+//        return next_states_list;
+//
+//    }
+
+    vector<tuple<StatePoint,int,double>> get_next_statesV2(u_int64_t hash_state,int jumps,int mode=0)
     {
         assert(step_counter>=0 );
         time_t=memo[step_counter--];
-        std::vector<K> indexing_arr = this->mapper_pathz.at(hash_state);
+        assert(time_t-memo[step_counter]==jumps);
+        std::vector<std::pair<int,int>> indexing_arr = this->state_lookup.at(hash_state);
+        if (mode==2)
+            indexing_arr = filter_only_exact_time(indexing_arr,memo[step_counter]);
         double sum=0;
-        std::for_each(indexing_arr.begin(),indexing_arr.end(),[&](auto &i){sum+=this->probabilities[i];});
+        std::for_each(indexing_arr.begin(),indexing_arr.end(),[&](const std::pair<int,int> &i){sum+=this->probabilities[i.first];});
         vector<tuple<StatePoint,int,double>> next_states_list;
         next_states_list.reserve(indexing_arr.size());
-        std::for_each(indexing_arr.begin(),indexing_arr.end(),[&](const K& index_path){
-            next_states_list.emplace_back(get_jumping_state(time_t,index_path),time_t,this->probabilities[index_path]/sum);
+        std::for_each(indexing_arr.begin(),indexing_arr.end(),[&](const std::pair<int,int> &item){
+
+            int index_path = item.first;
+            int s_t = item.second+jumps;
+            next_states_list.emplace_back(get_jumping_state(s_t,index_path),s_t,this->probabilities[index_path]/sum);
+
         });
-#ifdef PRINT
-        //        for(const auto& item:next_states_list)
-//        {
-//            cout<<"p:"<<item.second<<" s':"<<item.first<<"\t";
-//        }
-#endif
+
         return next_states_list;
 
     }
+
+    auto filter_only_exact_time(const std::vector<std::pair<int,int>> &indexing_arr ,int t)
+    {
+        std::vector<std::pair<int,int>> results;
+        for(int i=0;i<indexing_arr.size();++i)
+        {
+            if (indexing_arr[i].second==t)
+                results.push_back(indexing_arr[i]);
+        }
+        return  results;
+    }
+
     StatePoint get_next_actual_state(u_int jump=1)
     {
         assert(jump>0);
@@ -179,6 +214,7 @@ private:
 
             }
         }
+        populate_dict_lookup();
         char sep=';';
         auto iter = probabilities.begin();
         int p_num=0;
@@ -206,6 +242,25 @@ private:
         for( u_int16_t i = 0; i < x; i++ )
             l.push_back(i);
         return l;
+    }
+
+    void populate_dict_lookup()
+    {
+        for (int i=0;i<all_paths.size();++i)
+        {
+            for (int t_i=0;t_i<all_paths[i].size();++t_i)
+            {
+                auto item = all_paths[i][t_i];
+                u_int64_t h= item.getHashStateAttacker();
+                if(auto pos = this->state_lookup.find(h);pos==state_lookup.end())
+                {
+                    auto itesr =state_lookup.template try_emplace(h,1);
+                    itesr.first->second[0]={i,t_i};
+                }else{
+                    pos->second.push_back({i,t_i});
+                }
+            }
+        }
     }
 
 };

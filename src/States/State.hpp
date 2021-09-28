@@ -26,6 +26,7 @@ public:
     Grid *g_grid = nullptr;
     bool takeOff = false;
 
+
     void assignment(const State<> &other, agentEnum idname) {
         this->dataPoint[idname*2+1]=other.dataPoint[idname*2+1];
         this->dataPoint[idname*2]=other.dataPoint[idname*2];

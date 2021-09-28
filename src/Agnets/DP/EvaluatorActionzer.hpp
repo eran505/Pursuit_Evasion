@@ -48,7 +48,7 @@ Cell Evaluator::eval_states(vector<tuple<StatePoint, int, double>> &arr,State<> 
         s.set_speed(this->e,state_point.speed);
         s.set_position(this->e,state_point.pos);
         s.state_time=time_next; // fix the time step
-        assert(std::get<1>(itemL)==time_next);
+        //assert(std::get<1>(itemL)==time_next);
         set_jumps(s); // set the jumps
         policer->search_state(s);
         expected_sum_reward+=evalute_state(s,std::get<2>(itemL));

@@ -15,7 +15,6 @@ class Heuristicer{
     std::vector<Point> id_to_point=Point::getVectorActionUniqie();
     int max_speed_P;
     agentEnum Eid = agentEnum::A;
-
     agentEnum Pid = agentEnum::D;
     Rewards R = Rewards::getRewards();
     TrajectoriesTree trajectories_tree;
@@ -55,7 +54,7 @@ public:
         }
         if (h==5)
         {
-            H = [this](const State<> &ptrS) { return this->trajectories_tree.get_future_dist_all_paths_imporve_expection(ptrS);};
+            H = [this](const State<> &ptrS) { return this->trajectories_tree.Air_dis(ptrS);};
             H_plan=[this](const State<> &ptrS,int index_plan) { return this->trajectories_tree.H_plan(ptrS,index_plan);};
         }
 

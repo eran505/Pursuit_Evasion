@@ -14,15 +14,16 @@
 
 class ActionExpend{
     const StaticPolicy *other;
+    int mode = 0;
 public:
     vector<tuple<StatePoint,int,double>> expander_attacker(const State<> &s_state);
-    explicit ActionExpend(const StaticPolicy* _other):other(_other){}
+    explicit ActionExpend(const StaticPolicy* _other,int _mode):other(_other),mode(_mode){}
 };
 
 
 vector<tuple<StatePoint,int,double>> ActionExpend::expander_attacker(const State<> &s_state)
 {
-    return other->weighted_next_partial_state(s_state,s_state.jump);
+    return other->weighted_next_partial_state(s_state,s_state.jump,mode);
 }
 
 #endif //PE_ACTIONEXPENDER_H

@@ -22,6 +22,10 @@ class Emulator{
     int upper_time_bound = -1;
     std::function<int(const Point&,const Point&)> jump_func;
     std::vector<int> split_vec;
+
+    // for debug
+    State<> s_old;
+
 public:
 
     Emulator(P* p , E* e , State<> &&s,const configGame &conf)
@@ -54,6 +58,7 @@ public:
 #ifdef PRINT
             std::cout<<"run: "<<episodes<<"\t[state] "<<s_state.to_string_state()<<"\t";
 #endif
+            //s_old=State<>(s_state);
             take_action_pursuer();
             take_action_evader();
 
@@ -63,9 +68,9 @@ public:
 
             episodes++;
 
-            #ifdef T_ASSERT
-            assert(s_state.budgets.ptr->t==s_state.state_time);
-            #endif
+
+            //assert_state_old();
+
             if (check_condition())
                 break;
 
@@ -73,6 +78,19 @@ public:
 
     }
 
+//    void assert_state_old()
+//    {
+//        auto old_l_p = s_old.get_position_ref(this->pursuer->get_id());
+//        auto l_p = s_state.get_position_ref(this->pursuer->get_id());
+//        auto v_p = s_state.get_speed_ref(this->pursuer->get_id());
+//        auto res = old_l_p+(v_p)*s_old.jump;
+//        if(!(res==l_p))
+//        {
+//
+//            cout<<"bugbug"<<"calc:"<<l_p.to_str()<<" : "<<res.to_str()<<endl;
+//        }
+//
+//    }
 
     void main_loop(u_int32_t num_of_games)
     {
@@ -164,6 +182,7 @@ public:
         s_state.jump=0;
         pursuer->update_state(s_state);
         pursuer->update_B_tree(evader->get_currnt_path());
+
     }
     void take_action_pursuer()
     {

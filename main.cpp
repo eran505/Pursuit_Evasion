@@ -37,7 +37,7 @@ int main() {
         //conf.maxA=3;
         // all the mode with -1 are GR naive agents
         if (conf.mode<0) {gr_id.push_back(i);continue;}
-        if (conf.mode==1 and conf.h==3) conf.h=2;
+        //if (conf.mode==1 and conf.h==3) conf.h=2;
 
         auto grid = Initializer::init_grid(conf.sizeGrid,conf.gGoals,conf.probGoals);
         State s;
@@ -66,6 +66,7 @@ int main() {
     }
 
     for (int idx : gr_id) {
+        seed = get_random_time();
         auto conf = configGame(rowsCsv[idx],seed);
         game_start(conf);
     }
@@ -75,6 +76,7 @@ int main() {
 
 void game_start(configGame &conf)
 {
+
     srand(conf._seed);
     auto grid = Initializer::init_grid(conf.sizeGrid,conf.gGoals,conf.probGoals);
     State s;
@@ -94,13 +96,24 @@ int get_random_time()
 {
     int seed_me=0;
     auto start = std::chrono::system_clock::now();
-    // Some computation here
+
     std::this_thread::sleep_for(1ms);
 
     auto end = std::chrono::system_clock::now();
 
     auto s1 = std::chrono::duration_cast<std::chrono::nanoseconds> (end-start).count();
 
-    seed_me = s1;
-    return seed_me+time(nullptr)%1000;
+
+    start = std::chrono::system_clock::now();
+
+    std::this_thread::sleep_for(1ms);
+
+    end = std::chrono::system_clock::now();
+
+    auto s2 = std::chrono::duration_cast<std::chrono::nanoseconds> (end-start).count();
+
+
+    seed_me = s1+s2;
+    seed_me = seed_me+time(nullptr)%1000000;
+    return seed_me;
 }

@@ -19,7 +19,9 @@ class TrajectoriesTree{
     std::vector<double> prior_p_paths;
     std::unique_ptr<std::unordered_map<u_int64_t,std::vector<int16_t>>>  dict_loc_time= nullptr;
     std::unique_ptr<std::unordered_map<u_int64_t,std::vector<int16_t>>>  dict_loc= nullptr;
+    std::unique_ptr<std::unordered_map<u_int64_t,u_int>>  min_t_dict= nullptr;
     vector<u_int16_t > names;
+
 public:
 
     explicit TrajectoriesTree(const std::vector<std::vector<Point>> &pathz,const std::vector<double>& probablities,std::vector<u_int16_t>&& names_):names(names_)
@@ -35,6 +37,8 @@ public:
     {
         dict_loc_time = std::make_unique<std::unordered_map<u_int64_t,std::vector<int16_t>>>(evader_loc_time_t_to_pahts());
         dict_loc = std::make_unique<std::unordered_map<u_int64_t,std::vector<int16_t>>>(evader_loc_time_t_to_pahts(false));
+        min_t_dict = std::make_unique<std::unordered_map<u_int64_t,u_int>>(evader_min_time_t_());
+
     }
 
     std::vector<std::vector<Point>> get_pathz(){return all_paths;}
@@ -64,54 +68,26 @@ public:
 
 
 
-    double get_min_steps_all_end(const State<> &s)
-    {
-        const Point& evader_position = s.get_position_ref(e);
-        const Point& p_pos = s.get_position_ref(this->p);
-
-        auto begin_look_up = s.state_time+s.jump;
-        auto vec = s.budgets.ptr->get_plans();
-        u_int32_t min_step_val=100000;
-        for (int index_path : vec) {
-            auto idx = name_to_idx(index_path);
-            if (auto dist= get_min_step_diff_last_orgin(p_pos,idx,begin_look_up);dist<min_step_val)
-                min_step_val = dist;
-        }
-        auto h = this->R.CollReward*std::pow(R.discountF,min_step_val+s.state_time);
-        return h;
-    }
-
-    double get_min_steps_all_endV2(const State<> &s)
-    {
-        const Point& evader_position = s.get_position_ref(e);
-        const Point& p_pos = s.get_position_ref(this->p);
-        auto begin_look_up = s.state_time+s.jump;
-        u_int32_t min_step_val=1000000;
-        for (int index_path : names) {
-            auto idx = name_to_idx(index_path);
-            if (auto dist= get_min_step_diff_last_orgin(p_pos,idx,begin_look_up);dist<min_step_val)
-                min_step_val = dist;
-        }
-        return this->R.CollReward*std::pow(R.discountF,min_step_val);
-    }
-    double get_future_dist_all_paths_imporve_expection(const State<> &s)const
+    double Air_dis(const State<> &s)
     {
 
         const Point& p_pos = s.get_position_ref(this->p);
         const Point& e_pos = s.get_position_ref(this->e);
-
-        auto begin_look_up = s.state_time;
         //begin_look_up = s.state_time;
-        auto vec = dict_loc->at(e_pos.expHash());
+        auto vec = dict_loc->at(e_pos.hashConst());
+        assert(!vec.empty() and vec.size()<=this->all_paths.size());
         std::vector<double>D(vec.size());
         double result=0.0;
         double sum_all_prob = 0.0;
         for(int k=0;k<vec.size();k++)
         {
             u_int index_plan = name_to_idx(vec[k]);
+            auto begin_look_up = get_time(index_plan,e_pos);
             auto steps =get_min_step_diffV2(p_pos,index_plan,begin_look_up,s.jump);
-            if(steps==MAX_STEP)
-                D[k] = this->R.GoalReward*std::pow(R.discountF,all_paths[index_plan].size()-begin_look_up-1);
+            if(steps==MAX_STEP) {
+                D[k] = this->R.GoalReward * std::pow(R.discountF, all_paths[index_plan].size() - begin_look_up - 1);
+                D[k] = 0;
+            }
             else D[k]= this->R.CollReward*std::pow(R.discountF,steps);
             sum_all_prob+=prior_p_paths[index_plan];
         }
@@ -120,28 +96,9 @@ public:
             result+=D[i]*(prior_p_paths[index_plan]/sum_all_prob);
         }
         return result;
+
     }
 
-    double get_future_dist_all_paths_imporve(const State<> &s)const
-    {
-
-        const Point& p_pos = s.get_position_ref(this->p);
-        const Point& e_pos = s.get_position_ref(this->e);
-        auto vec = dict_loc_time->at(e_pos.expHash()+s.state_time);
-        assert(!vec.empty() and vec.size()<=this->all_paths.size());
-        auto begin_look_up = s.state_time;
-        std::vector<double>D(all_paths.size());
-
-        for(int k=0;k<vec.size();k++)
-        {
-            u_int index_plan = name_to_idx(vec[k]);
-            auto steps =get_min_step_diff_last_orgin(p_pos,index_plan,begin_look_up);
-            if(steps==MAX_STEP)
-                D[k] = this->R.GoalReward*std::pow(R.discountF,all_paths[index_plan].size()-begin_look_up-1);
-            else D[k]= this->R.CollReward*std::pow(R.discountF,steps);
-        }
-        return *std::max_element(D.begin(),D.end());
-    }
 
     double get_future_dist_all_paths(const State<> &s)const
     {
@@ -153,12 +110,40 @@ public:
         for(int k=0;k<all_paths.size();k++)
         {
             u_int index_plan = name_to_idx(k);
-            auto steps =get_min_step_diff_last_orgin(p_pos,index_plan,begin_look_up);
-            if(steps==MAX_STEP) D[k] = 0;
+            auto steps =get_min_step_diff_last_orgin(p_pos,0,0);
+            D[k]= this->R.CollReward*std::pow(R.discountF,steps);
+        }
+        return *std::max_element(D.begin(),D.end());
+    }
+
+
+    double get_future_dist_all_paths_imporve(const State<> &s)const
+    {
+
+        const Point& p_pos = s.get_position_ref(this->p);
+        const Point& e_pos = s.get_position_ref(this->e);
+        //auto vec = dict_loc_time->at(e_pos.expHash()+s.state_time);
+        auto vec = dict_loc->at(e_pos.hashConst());
+        assert(!vec.empty() and vec.size()<=this->all_paths.size());
+        auto begin_look_up = min_t_dict->at(e_pos.hashConst());
+        std::vector<double>D(vec.size());
+
+        for(int k=0;k<vec.size();k++)
+        {
+            u_int index_plan = name_to_idx(vec[k]);
+            //begin_look_up = get_time(index_plan,e_pos);
+            //auto steps =get_min_step_diff_last_orgin(p_pos,index_plan,begin_look_up);
+            auto steps =get_min_step_diffV2(p_pos,index_plan,begin_look_up,s.jump);
+            if(steps==MAX_STEP) {
+                D[k] = this->R.GoalReward * std::pow(R.discountF, all_paths[index_plan].size() - begin_look_up - 1);
+                D[k] = 0;
+            }
             else D[k]= this->R.CollReward*std::pow(R.discountF,steps);
         }
         return *std::max_element(D.begin(),D.end());
     }
+
+
 
     double all_future_distances_min(const State<>& s,bool is_optim=true)const
     {
@@ -172,7 +157,8 @@ public:
         {
             u_int index_plan = name_to_idx(vec[k]);
             auto steps =get_min_step_diffV2(p_pos,index_plan,begin_look_up,s.jump);
-            if(steps==MAX_STEP) D[k] = 0;
+            if(steps==MAX_STEP)
+                D[k] = 0;
             else D[k]= this->R.CollReward*std::pow(R.discountF,steps);
         }
         return *std::max_element(D.begin(),D.end());
@@ -192,8 +178,10 @@ public:
         {
             u_int index_plan = name_to_idx(vec[k]);
             auto steps =get_min_step_diffV2(p_pos,index_plan,begin_look_up,s.jump);
-            if(steps==MAX_STEP)
-                D[k] = this->R.GoalReward*std::pow(R.discountF,all_paths[index_plan].size()-begin_look_up-1);
+            if(steps==MAX_STEP) {
+                D[k] = this->R.GoalReward * std::pow(R.discountF, all_paths[index_plan].size() - begin_look_up - 1);
+                D[k] = 0;
+            }
             else D[k]= this->R.CollReward*std::pow(R.discountF,steps);
             sum_all_prob+=prior_p_paths[index_plan];
         }
@@ -241,13 +229,14 @@ private:
                 if(min_d>t_e) min_d = t_e;
             }
         }
-        assert(min_d>0);
+
+        assert(min_d>=0);
         return min_d;
     }
 
     u_int32_t get_min_step_diff_last_orgin(const Point& p_pos,size_t index_path, u_int start_look)const
     {
-        u_int32_t min_step= Point::distance_min_step(p_pos,all_paths[index_path][start_look]);
+        u_int32_t min_step = Point::distance_min_step(p_pos,all_paths[index_path][start_look]);
         for (int i = int(start_look)+1; i < all_paths[index_path].size()-1 ; ++i) {
             auto res = Point::distance_min_step(p_pos,all_paths[index_path][i]);
             if (min_step>res) min_step=res;
@@ -261,15 +250,19 @@ private:
         for(int i=0;i<all_paths.size();++i){
             for (int j=0;j<all_paths[i].size();++j){
                 u_int64_t h;
-                if(time_t)  h = all_paths[i][j].expHash()+j;
-                else  h = all_paths[i][j].expHash();
+                if(time_t)  h = all_paths[i][j].hashConst()+j;
+                else  h = all_paths[i][j].hashConst();
                 //cout<<"loc:"<<all_paths[i][j].to_str()<<"\t t:"<<j<<endl;
                 if(auto pos = dico.find(h);pos==dico.end()){
                     auto itesr = dico.try_emplace(h,1);
                     itesr.first->second[0]=i;
                 }
                 else{
-                    pos->second.push_back(i);
+                    bool insert=true;
+                    for (const auto& x_it : pos->second)
+                        if (x_it==i)
+                            insert=false;
+                    if (insert) pos->second.push_back(i);
                 }
             }
         }
@@ -306,6 +299,35 @@ private:
 
     }
 
+    std::unordered_map<u_int64_t,u_int>  evader_min_time_t_()
+    {
+        std::unordered_map<u_int64_t,u_int> dico;
+        for(int i=0;i<all_paths.size();++i){
+            for (int j=0;j<all_paths[i].size();++j){
+                u_int64_t h=all_paths[i][j].hashConst();
+
+                if(auto pos = dico.find(h);pos==dico.end()){
+                    auto itesr = dico.try_emplace(h,std::max(j,0));
+                }
+                else{
+                    bool insert=false;
+                    if (pos->second>j)
+                        insert=true;
+                    if (insert)
+                        pos->second=j;
+                }
+            }
+        }
+        return dico;
+    }
+    int get_time(int idx, const Point& l_e)const
+    {
+        for (int i = 0; i < all_paths[idx].size(); ++i) {
+            if (all_paths[idx][i]==l_e)
+                return i;
+        }
+        assert(false);
+    }
 
 };
 

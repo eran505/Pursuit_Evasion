@@ -113,9 +113,9 @@ public:
         s.set_position(this->get_id(),std::move(StatePoint.pos));
 
     }
-    vector<tuple<StatePoint,int,double>> weighted_next_partial_state(const State<> &s,uint jumps) const{
+    vector<tuple<StatePoint,int,double>> weighted_next_partial_state(const State<> &s,uint jumps,int mode=0) const{
         //cout<<"s: "<<s.to_string_state()<<"]  ";
-        return mapper->get_next_states(get_hash_state(s),jumps);
+        return mapper->get_next_statesV2(get_hash_state(s),jumps,mode);
     }
     std::vector<std::vector<StatePoint>> get_copy_pathz()const
     {

@@ -231,7 +231,9 @@ private:
         else if (div==2)
             p.array[1]=int(this->grid_size[1]*get_y_value_static_point_2(this->random_gen.get_double()));
         else if (div==0)
-            p.array[1]=int(this->grid_size[1]*get_y_value_static_point_little(this->random_gen.get_double()));
+            p.array[1]=int(this->grid_size[1]*get_y_value_static_point_littleV7(this->random_gen.get_double()));
+        else if(div==11)
+            p.array[1]=int(this->grid_size[1]*get_y_value_static_point_littleV3(this->random_gen.get_double()));
         else if (div==4)
             p.array[1]=int(this->grid_size[1]*get_y_value_static_point_4(this->random_gen.get_double()));
         else if (div==9)
@@ -250,7 +252,7 @@ private:
     {
         auto x_axis = A_list.back().pos.array[0];
         // py1
-        return {*A_list.begin(),get_random_pointV1(0.15,9,x_axis),get_random_pointV1(0.3,1,x_axis),get_random_pointV1(0.9,1,x_axis),A_list.back()};
+        return {*A_list.begin(),get_random_pointV1(0.1,0,x_axis),get_random_pointV1(0.5,1,x_axis),get_random_pointV1(0.9,1,x_axis),A_list.back()};
         // py2
     }
     void pathsToDict(const vector<AStar::StatePoint>& allPath) {
@@ -286,7 +288,6 @@ private:
 
     static double get_y_value_static_point_4(double seed)
     {
-
         //if(seed<0.1) return 0.1;
         if(seed<0.25) return 0.2;
         //if(seed<0.3) return 0.3;
@@ -323,21 +324,53 @@ private:
         else return 0.59;
     }
 
+
+    static double get_y_value_static_point_littleV7(double seed)
+    {
+        if(seed<0.14) return 0.35;
+        if(seed<0.28) return 0.40;
+        if(seed<0.43) return 0.45;
+        if(seed<0.58) return 0.50;
+        if(seed<0.73) return 0.55;
+        if(seed<0.88) return 0.60;
+        else return 0.65;
+    }
+
+    static double get_y_value_static_point_littleV3(double seed)
+    {
+        if(seed<0.33) return 0.45;
+        if(seed<0.66) return 0.50;
+
+        else return 0.55;
+    }
+
+    static double get_y_value_static_point_littleV5(double seed)
+    {
+
+
+        if(seed<0.2) return 0.42;
+        if(seed<0.4) return 0.46;
+        if(seed<0.6) return 0.50;
+        if(seed<0.8) return 0.54;
+
+        else return 0.58;
+    }
+
     static double get_y_value_static_point_3(double seed)
     {
 
         //if(seed<0.1) return 0.1;
         if(seed<0.33) return 0.3;
         //if(seed<0.3) return 0.3;
-        if(seed<0.66) return 0.6;
+        if(seed<0.66) return 0.5;
             //if(seed<0.5) return 0.5;
-        else return 0.9;
+        else return 0.7;
 
     }
     static double get_y_value_static_point_2(double seed)
     {
-        if(seed<0.5) return 0.33;
-        return 0.66;
+        if(seed<0.5) return 0.3;
+        return 0.7;
     }
     static double get_y_value_static_point_5(double seed)
     {
