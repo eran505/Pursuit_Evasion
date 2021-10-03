@@ -49,12 +49,22 @@ public:
         }
         if (h==4)
         {
-            H = [this](const State<> &ptrS) { return this->trajectories_tree.get_future_dist_all_paths_imporve(ptrS);};
+            H = [this](const State<> &ptrS) { return this->trajectories_tree.get_future_dist_all_paths_imporveV2(ptrS);};
             H_plan=[this](const State<> &ptrS,int index_plan) { return this->trajectories_tree.H_plan(ptrS,index_plan);};
         }
         if (h==5)
         {
             H = [this](const State<> &ptrS) { return this->trajectories_tree.Air_dis(ptrS);};
+            H_plan=[this](const State<> &ptrS,int index_plan) { return this->trajectories_tree.H_plan(ptrS,index_plan);};
+        }
+        if (h==6)
+        {
+            H = [this](const State<> &ptrS) { return this->trajectories_tree.Air_dis_min(ptrS);};
+            H_plan=[this](const State<> &ptrS,int index_plan) { return this->trajectories_tree.H_plan(ptrS,index_plan);};
+        }
+        if (h==7)
+        {
+            H = [this](const State<> &ptrS) { return this->trajectories_tree.get_future_dist_all_paths_imporve(ptrS);};
             H_plan=[this](const State<> &ptrS,int index_plan) { return this->trajectories_tree.H_plan(ptrS,index_plan);};
         }
 

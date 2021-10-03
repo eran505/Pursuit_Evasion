@@ -65,7 +65,32 @@ public:
 
         return s;
     }
+    double Air_dis_min(const State<> &s)
+    {
 
+        const Point& p_pos = s.get_position_ref(this->p);
+        const Point& e_pos = s.get_position_ref(this->e);
+        //begin_look_up = s.state_time;
+        auto vec = dict_loc->at(e_pos.hashConst());
+        assert(!vec.empty() and vec.size()<=this->all_paths.size());
+        std::vector<double>D(vec.size());
+        double result=0.0;
+        double sum_all_prob = 0.0;
+        for(int k=0;k<vec.size();k++)
+        {
+            u_int index_plan = name_to_idx(vec[k]);
+            auto begin_look_up = get_time(index_plan,e_pos);
+            auto steps =get_min_step_diffV2(p_pos,index_plan,begin_look_up,s.jump);
+            if(steps==MAX_STEP) {
+                D[k] = this->R.GoalReward * std::pow(R.discountF, all_paths[index_plan].size() - begin_look_up - 1);
+                D[k] = 0;
+            }
+            else D[k]= this->R.CollReward*std::pow(R.discountF,steps);
+
+        }
+        return *std::max_element(D.begin(),D.end());
+
+    }
 
 
     double Air_dis(const State<> &s)
@@ -131,8 +156,6 @@ public:
         for(int k=0;k<vec.size();k++)
         {
             u_int index_plan = name_to_idx(vec[k]);
-            //begin_look_up = get_time(index_plan,e_pos);
-            //auto steps =get_min_step_diff_last_orgin(p_pos,index_plan,begin_look_up);
             auto steps =get_min_step_diffV2(p_pos,index_plan,begin_look_up,s.jump);
             if(steps==MAX_STEP) {
                 D[k] = this->R.GoalReward * std::pow(R.discountF, all_paths[index_plan].size() - begin_look_up - 1);
@@ -144,6 +167,37 @@ public:
     }
 
 
+    double get_future_dist_all_paths_imporveV2(const State<> &s)const
+    {
+
+        const Point& p_pos = s.get_position_ref(this->p);
+        const Point& e_pos = s.get_position_ref(this->e);
+        //auto vec = dict_loc_time->at(e_pos.expHash()+s.state_time);
+        auto vec = dict_loc->at(e_pos.hashConst());
+        assert(!vec.empty() and vec.size()<=this->all_paths.size());
+        auto begin_look_up = min_t_dict->at(e_pos.hashConst());
+        std::vector<double>D(vec.size());
+        auto sum_all_prob = 0.0;
+
+        for(int k=0;k<vec.size();k++)
+        {
+            u_int index_plan = name_to_idx(vec[k]);
+            auto steps =get_min_step_diffV2(p_pos,index_plan,begin_look_up,s.jump);
+            if(steps==MAX_STEP) {
+                D[k] = this->R.GoalReward * std::pow(R.discountF, all_paths[index_plan].size() - begin_look_up - 1);
+                D[k] = 0;
+            }
+            else D[k]= this->R.CollReward*std::pow(R.discountF,steps);
+            sum_all_prob+=prior_p_paths[index_plan];
+        }
+        double result=0.0;
+        for (int i = 0; i < D.size(); ++i) {
+            u_int index_plan = name_to_idx(vec[i]);
+            result+=D[i]*(prior_p_paths[index_plan]/sum_all_prob);
+        }
+
+        return result;
+    }
 
     double all_future_distances_min(const State<>& s,bool is_optim=true)const
     {

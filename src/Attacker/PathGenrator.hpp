@@ -231,7 +231,7 @@ private:
         else if (div==2)
             p.array[1]=int(this->grid_size[1]*get_y_value_static_point_2(this->random_gen.get_double()));
         else if (div==0)
-            p.array[1]=int(this->grid_size[1]*get_y_value_static_point_littleV7(this->random_gen.get_double()));
+            p.array[1]=int(this->grid_size[1]*get_y_value_static_point_littleV11(this->random_gen.get_double()));
         else if(div==11)
             p.array[1]=int(this->grid_size[1]*get_y_value_static_point_littleV3(this->random_gen.get_double()));
         else if (div==4)
@@ -242,7 +242,8 @@ private:
             p.array[1]=int(this->grid_size[1]*get_y_value_static_point_7(this->random_gen.get_double()));
         else
             assert(false);
-            //p.array[1]=int(this->grid_size[1]*get_y_value_static_point_9(this->random_gen.get_double()));
+
+        //p.array[1]=int(this->grid_size[1]*get_y_value_static_point_9(this->random_gen.get_double()));
 
         p.array[2]=3;
         cout<<"Random--->"<<p.to_str()<<endl;
@@ -252,8 +253,9 @@ private:
     {
         auto x_axis = A_list.back().pos.array[0];
         // py1
-        return {*A_list.begin(),get_random_pointV1(0.1,0,x_axis),get_random_pointV1(0.5,1,x_axis),get_random_pointV1(0.9,1,x_axis),A_list.back()};
+        return {*A_list.begin(),get_random_pointV1(0.1,0,x_axis),get_random_pointV1(0.2,11,x_axis),get_random_pointV1(0.4,1,x_axis),get_random_pointV1(0.9,1,x_axis),A_list.back()};
         // py2
+
     }
     void pathsToDict(const vector<AStar::StatePoint>& allPath) {
         //RAW_policyMap.clear();
@@ -322,6 +324,21 @@ private:
         if(seed<0.90) return 0.57;
         if(seed<0.95) return 0.58;
         else return 0.59;
+    }
+
+    static double get_y_value_static_point_littleV11(double seed)
+    {
+        if(seed<0.09) return 0.35;// 1
+        if(seed<0.18) return 0.47;// 2
+        if(seed<0.27) return 0.49;// 3
+        if(seed<0.37) return 0.51;// 4
+        if(seed<0.45) return 0.53;// 5
+        if(seed<0.54) return 0.55;// 6
+        if(seed<0.63) return 0.57;// 7
+        if(seed<0.72) return 0.59;// 8
+        if(seed<0.81) return 0.61;// 9
+        if(seed<0.90) return 0.63;// 10
+        else return 0.65;
     }
 
 
