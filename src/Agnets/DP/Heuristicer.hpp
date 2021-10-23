@@ -67,6 +67,12 @@ public:
             H = [this](const State<> &ptrS) { return this->trajectories_tree.get_future_dist_all_paths_imporve(ptrS);};
             H_plan=[this](const State<> &ptrS,int index_plan) { return this->trajectories_tree.H_plan(ptrS,index_plan);};
         }
+        if (h==8)
+        {
+            H = [this](const State<> &ptrS) { return this->trajectories_tree.Air(ptrS);};
+            H_plan=[this](const State<> &ptrS,int index_plan) { return this->trajectories_tree.H_plan(ptrS,index_plan);};
+        }
+
 
 
     }

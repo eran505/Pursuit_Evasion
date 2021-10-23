@@ -253,7 +253,7 @@ private:
     {
         auto x_axis = A_list.back().pos.array[0];
         // py1
-        return {*A_list.begin(),get_random_pointV1(0.1,0,x_axis),get_random_pointV1(0.2,11,x_axis),get_random_pointV1(0.4,1,x_axis),get_random_pointV1(0.9,1,x_axis),A_list.back()};
+        return {*A_list.begin(),get_random_pointV1(0.2,5,x_axis),get_random_pointV1(0.7,5,x_axis),A_list.back()};
         // py2
 
     }

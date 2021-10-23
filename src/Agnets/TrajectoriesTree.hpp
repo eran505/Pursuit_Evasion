@@ -65,6 +65,14 @@ public:
 
         return s;
     }
+    double Air(const State<> &s)
+    {
+        const Point& p_pos = s.get_position_ref(this->p);
+        const Point& e_pos = s.get_position_ref(this->e);
+        auto dif = Point::distance_min_step(e_pos,p_pos)/3.0;
+        double  res = this->R.CollReward*std::pow(R.discountF,int(dif));
+        return res;
+    }
     double Air_dis_min(const State<> &s)
     {
 

@@ -135,7 +135,7 @@ int AStar::Generator::findPath( StatePoint& source_,const StatePoint& target_,bo
 
     //this->operatorAction=Point::getAllAction2(operatorAction,2); // TODO: del it the attacker cant take off
 
-    int optCost = this->gridSize.multi();
+    u_int64_t optCost = this->gridSize.multi();
     CoordinateList path;
     multimap<double, Node *> openSetQ;
     unordered_map<u_int64_t , Node *> openSetID;
@@ -148,6 +148,7 @@ int AStar::Generator::findPath( StatePoint& source_,const StatePoint& target_,bo
     u_int MAX_PATH=1;
     openSetID.insert({first->getHashNode(), first});
     openSetQ.insert({first->getScore(), first});
+    int ctr_my=0;
     while (!openSetQ.empty()) {
 
         //expand node
